@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script type="text/javascript">
+
+      function formSubmit()
+      {
+        google.script.run.withSuccessHandler(onSuccess).buildTemplate(document.forms[0]);
+      }
+      
+      function onSuccess(val)
+      {
+          var div = document.getElementById("output");
+          div.innerHTML = val;
+      }
+      
+    </script>
+  </head>
+  <body>
+    <form>
+      <input type="text" value=" " name="rip" />
+      <input type="button" onClick="formSubmit()" value="Submit" />
+    </form>
+    <div id = "output"></div>
+  </body>
+</html>
