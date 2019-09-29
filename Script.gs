@@ -1,12 +1,13 @@
 
-function buildtemplate(id)
+function buildTemplate(id)
 {
   var range = SpreadsheetApp.getActiveSheet().getRange('A2');
   var description = "";
 
   range.setValue('Retrieving video details...');
   
-  var videoId = JSON.stringify(id).replace("{\"rip\":\" ", "").replace("\"}", "");
+  var videoId = JSON.stringify(id).replace("{\"rip\":\"", "").replace("\"}", "");
+  Logger.log(videoId);
   //var videoId = "EouWnJVXoTE";
   var playlistId = [];
   var uploadDate = "";
@@ -121,8 +122,8 @@ function buildtemplate(id)
               "\n\n|link= " + videoId + 
               "\n|playlist= " + game.join("") +
               "\n|playlist id=" + playlistId.join("").replace("https://www.youtube.com/playlist?list=", "") +
-              "\n|upload=" + uploadDate +
-              "\n|length=" + length +
+              "\n|upload= " + uploadDate +
+              "\n|length= " + length +
               "\n|author=" +
               "\n" +
               "\n|album=" +
@@ -147,7 +148,7 @@ function buildtemplate(id)
     Logger.log(e);
     console.log(e);
   }
-  
+
   return val.replace(/\n/g, "<br>");
 } 
 
