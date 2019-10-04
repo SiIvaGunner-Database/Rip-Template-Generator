@@ -7,7 +7,7 @@ function buildTemplate(id)
   range.setValue('Retrieving video details...');
   
   var videoId = JSON.stringify(id).replace("{\"rip\":\"", "").replace("\"}", "");
-  Logger.log(videoId);
+  //var videoId = "mLo9HAII9Fw";
   //var videoId = "EouWnJVXoTE";
   var playlistId = [];
   var uploadDate = "";
@@ -40,10 +40,23 @@ function buildTemplate(id)
                             length = item.contentDetails.duration.toString();
                           });
     
+    for (var i = 0; i < length.length; i++)
+    {
+      if (length.charAt(i) == "M" && length.charAt(i+2) == "S")
+        length = length.replace("M", ":0");
+      else if (length.charAt(i) == "H" && length.charAt(i+2) == "M")
+        length = length.replace("H", ":0");
+    }
+
+    length = length.replace("PT", "").replace("H", ":").replace("M", ":").replace("S", "");// TODO Research RegExp
+    
+    uploadDate = Utilities.formatDate(new Date(uploadDate), "GMT", "MMMM dd, yyyy"); // TODO Check the timezone
+
     // Put the title, description, and ID into the template.
     var temp = pageName.split("");
     var copy = "";
-    for (var i in temp)
+    i = 0;
+    for (i in temp)
     {
       copy += temp[i].toString();
 
@@ -136,7 +149,7 @@ function buildTemplate(id)
               "\n}}" +
               "\n\"\'\'\'" + pageName + "\'\'\'\" is a high quality rip " + mix +
               "of \"" + simplifiedTrack.join("") + "\" from \'\'" + game.join("") + "\'\'." +
-              "\n\n== Jokes ==";
+              "\n== Jokes ==";
     
     range.setValue(val);
     
