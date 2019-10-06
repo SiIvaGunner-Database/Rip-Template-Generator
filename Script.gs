@@ -6,8 +6,8 @@ function buildTemplate(id)
 
   range.setValue('Retrieving video details...');
   
-  //var videoId = JSON.stringify(id).replace("{\"\":\"", "").replace("\"}", "");
-  var videoId = "8L2emkGw2YI";
+  var videoId = JSON.stringify(id).replace("{\"\":\"", "").replace("\"}", "");
+  //var videoId = "xlCfIDjlplE";
   var playlistId = [];
   var uploadDate = "";
   var length = "";
@@ -71,9 +71,8 @@ function buildTemplate(id)
     {
       copy += temp[i].toString();
       
-      if (copy.indexOf(" - ") != -1)
-        if (i > lastHyphenLine)
-          game.push(temp[i]);
+      if (copy.indexOf(" - ") != -1 && parseInt(i) > parseInt(lastHyphenLine))
+        game.push(temp[i]);
       else if (copy.indexOf("(") != -1)
       {
         mix.push(temp[i]);
@@ -178,7 +177,7 @@ function buildTemplate(id)
     console.log(e);
   }
 
-  //return val.replace(/\n/g, "<br>");
+  return val.replace(/\n/g, "<br>");
 } 
 
 function doGet()
