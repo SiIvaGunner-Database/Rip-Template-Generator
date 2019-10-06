@@ -6,9 +6,8 @@ function buildTemplate(id)
 
   range.setValue('Retrieving video details...');
   
-  var videoId = JSON.stringify(id).replace("{\"rip\":\"", "").replace("\"}", "");
-  //var videoId = "mLo9HAII9Fw";
-  //var videoId = "EouWnJVXoTE";
+  //var videoId = JSON.stringify(id).replace("{\"\":\"", "").replace("\"}", "");
+  var videoId = "8L2emkGw2YI";
   var playlistId = [];
   var uploadDate = "";
   var length = "";
@@ -39,29 +38,42 @@ function buildTemplate(id)
                             uploadDate = item.snippet.publishedAt.toString();
                             length = item.contentDetails.duration.toString();
                           });
-    
+
     for (var i = 0; i < length.length; i++)
     {
-      if (length.charAt(i) == "M" && length.charAt(i+2) == "S")
+      if (length.charAt(i) == "T" && length.charAt(i+2) == "S")
+        length = length.replace("PT", "0:0");
+      else if (length.charAt(i) == "T" && length.charAt(i+3) == "S")
+        length = length.replace("PT", "0:");
+      else if (length.charAt(i) == "M" && length.charAt(i+2) == "S")
         length = length.replace("M", ":0");
-      else if (length.charAt(i) == "H" && length.charAt(i+2) == "M")
+      if (length.charAt(i) == "H" && length.charAt(i+2) == "M")
         length = length.replace("H", ":0");
     }
 
-    length = length.replace("PT", "").replace("H", ":").replace("M", ":").replace("S", "");// TODO Research RegExp
+    length = length.replace("PT", "").replace("H", ":").replace("M", ":").replace("S", "");
     
-    uploadDate = Utilities.formatDate(new Date(uploadDate), "GMT", "MMMM dd, yyyy"); // TODO Check the timezone
+    uploadDate = Utilities.formatDate(new Date(uploadDate), "GMT-5", "MMMM d, yyyy");
 
     // Put the title, description, and ID into the template.
     var temp = pageName.split("");
     var copy = "";
+    var lastHyphenLine = 0;
     i = 0;
+    
+    for (i in temp)
+      if (temp[i] == "-")
+        lastHyphenLine = i;
+    
+    i = 0;
+    
     for (i in temp)
     {
       copy += temp[i].toString();
-
+      
       if (copy.indexOf(" - ") != -1)
-        game.push(temp[i]);
+        if (i > lastHyphenLine)
+          game.push(temp[i]);
       else if (copy.indexOf("(") != -1)
       {
         mix.push(temp[i]);
@@ -77,6 +89,7 @@ function buildTemplate(id)
     mix = mix.join("");
     simplifiedTrack = track.join("");
     simplifiedTrack = simplifiedTrack.split("");
+    
     for (i = 0; i < mix.length; i++)
       simplifiedTrack.pop();
     
@@ -105,6 +118,7 @@ function buildTemplate(id)
     }
     
     temp = description.split("");
+    Logger.log(temp);
     copy = "";
     i = 0;
 
@@ -122,6 +136,8 @@ function buildTemplate(id)
     }
     catchphrase.shift();
     platform.pop();
+    
+    Logger.log(copy);
     
     for (i = 0; i < 10; i++)
     {
@@ -162,7 +178,7 @@ function buildTemplate(id)
     console.log(e);
   }
 
-  return val.replace(/\n/g, "<br>");
+  //return val.replace(/\n/g, "<br>");
 } 
 
 function doGet()
