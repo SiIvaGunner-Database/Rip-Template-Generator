@@ -9,6 +9,10 @@ function buildTemplate(id)
   var videoId = JSON.stringify(id).replace("{\"\":\"", "").replace("\"}", "").replace("&feature=youtu.be", "").replace(/&.*/, "").replace(/h.*=/, "");
   //var videoId = "CH97oY2pZpg";
   //videoId = videoId.replace(/h.*=/, "");
+  
+  if (videoId.length != 11)
+    return "Invalid video ID: " + videoId;
+  
   var playlistId = [];
   var uploadDate = "";
   var length = "";
