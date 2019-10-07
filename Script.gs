@@ -6,20 +6,24 @@ function buildTemplate(id)
 
   range.setValue('Retrieving video details...');
   
-  var videoId = JSON.stringify(id).replace("{\"\":\"", "").replace("\"}", "");
-  //var videoId = "xlCfIDjlplE";
+  var videoId = JSON.stringify(id).replace("{\"\":\"", "").replace("\"}", "").replace("&feature=youtu.be", "").replace(/&.*/, "").replace(/h.*=/, "");
+  //var videoId = "CH97oY2pZpg";
+  //videoId = videoId.replace(/h.*=/, "");
   var playlistId = [];
   var uploadDate = "";
   var length = "";
   
   var composer = [];
   var platform = [];
+  var ripper = []
   var catchphrase = [];
   var pageName = "";
   var mix = [];
   var track = [];
   var simplifiedTrack = [];
   var game = [];
+  
+  var imageEmbed = "<img src=\"https://img.youtube.com/vi/" + videoId + "/maxresdefault.jpg\" alt=\"Thumbnail\" style=\"width:640px; height:360px;\">";
   
   try 
   {
@@ -104,28 +108,38 @@ function buildTemplate(id)
       for (i = 0; i < 6; i++)
         mix.pop();
       mix = "of the " + mix.join("") + "mix ";
-    } else if (mix.indexOf(")") != -1)
+    }/* else if (mix.indexOf(")") != -1)
     {
       mix = mix.split("");
       for (i = 0; i < 3; i++)
         mix.pop();
       mix = "of the " + mix.join("") + " ";
-    } else
+    }*/ else
     {
       mix = "";
       simplifiedTrack = track;
     }
     
+    var ignoreCatchphrase = false;
+    if (description.indexOf("Please read the channel description.") != -1)
+    {
+      description = description.replace("Please read the channel description.", "");
+      catchphrase = "";
+      ignoreCatchphrase = true;
+    }
+    
     temp = description.split("");
-    Logger.log(temp);
+    //Logger.log(temp);
     copy = "";
     i = 0;
 
     for (i in temp)
     {
       copy += temp[i].toString();
-      if (copy.indexOf("\n\n") != -1)
+      if (copy.indexOf("\n\n") != -1 && !ignoreCatchphrase)
         catchphrase.push(temp[i]);
+      else if (copy.indexOf("Ripper: ") != -1)
+        ripper.push(temp[i]);
       else if (copy.indexOf("Platform: ") != -1)
         platform.push(temp[i]);
       else if (copy.indexOf("Playlist: ") != -1) 
@@ -133,26 +147,40 @@ function buildTemplate(id)
       else if (copy.indexOf("Composer: ") != -1)
         composer.push(temp[i]);
     }
-    catchphrase.shift();
     platform.pop();
     
-    Logger.log(copy);
+    if (!ignoreCatchphrase)
+    {
+      catchphrase.shift();
+      catchphrase = "\n|catchphrase= " + catchphrase.join("");
+    } else
+    {
+      if (ripper.length != 0)
+        ripper.pop();
+      else
+        platform.pop();
+    }
+
     
     for (i = 0; i < 10; i++)
     {
       composer.pop();
       playlistId.pop();
     }
-    
+        
+    if (ripper.length != 0)
+      for (i = 0; i < 7; i++)
+        platform.pop();
+
     // Print the template to the sheet.
     var val = "{{Rip" +
               "\n|image= " + game.join("") + ".jpg" + 
               "\n\n|link= " + videoId + 
               "\n|playlist= " + game.join("") +
-              "\n|playlist id=" + playlistId.join("").replace("https://www.youtube.com/playlist?list=", "") +
+              "\n|playlist id=" + playlistId.join("").replace(/h.*=/, "") +
               "\n|upload= " + uploadDate +
               "\n|length= " + length +
-              "\n|author=" +
+              "\n|author=" + ripper.join("") +
               "\n" +
               "\n|album=" +
               "\n|track=" +
@@ -160,11 +188,13 @@ function buildTemplate(id)
               "\n|music= " + track.join("") +
               "\n|composer=" + composer.join("") +
               "\n|platform=" + platform.join("") +
-              "\n|catchphrase= " + catchphrase.join("") +
+              //* "\n|ripper=" + */ ripper +
+              /* "\n|catchphrase= " + */ catchphrase +
               "\n}}" +
               "\n\"\'\'\'" + pageName + "\'\'\'\" is a high quality rip " + mix +
               "of \"" + simplifiedTrack.join("") + "\" from \'\'" + game.join("") + "\'\'." +
-              "\n== Jokes ==";
+              "\n== Jokes ==" +
+              "\n\n" + imageEmbed;
     
     range.setValue(val);
     
