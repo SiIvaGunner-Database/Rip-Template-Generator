@@ -1,37 +1,37 @@
 
 function buildTemplate(id)
 {
-  var range = SpreadsheetApp.getActiveSheet().getRange('A2');
-  var description = "";
+  var range = SpreadsheetApp.getActiveSheet().getRange('A1');
 
-  range.setValue('Retrieving video details...');
-  
+  var description = "";
   var videoId = JSON.stringify(id).replace("{\"\":\"", "").replace("\"}", "").replace("&feature=youtu.be", "").replace(/&.*/, "").replace(/h.*=/, "");
-  //var videoId = "CH97oY2pZpg";
+  //var videoId = "P-NswzsNhro";
   //videoId = videoId.replace(/h.*=/, "");
   
   if (videoId.length != 11)
     return "Invalid video ID: " + videoId;
   
-  var playlistId = [];
+  var playlistId = "";
   var uploadDate = "";
   var length = "";
   
-  var composer = [];
-  var platform = [];
-  var ripper = []
-  var catchphrase = [];
+  var composer = "";
+  var composerLabel = "";
+  var platform = "";
+  var platformLabel = "";
+  var ripper = "";
+  var catchphrase = "";
   var pageName = "";
-  var mix = [];
-  var track = [];
-  var simplifiedTrack = [];
-  var game = [];
+  var mix = "";
+  var track = "";
+  var simplifiedTrack = "";
+  var game = "";
   
   var imageEmbed = "<img src=\"https://img.youtube.com/vi/" + videoId + "/maxresdefault.jpg\" alt=\"Thumbnail\" style=\"width:640px; height:360px;\">";
   
   try 
   {
-    // Fetch the video title and description.
+    // Fetch the video details.
     var results = YouTube.Videos.list('id,snippet,contentDetails',
                                       {
                                         id: videoId,
@@ -42,11 +42,60 @@ function buildTemplate(id)
     results.items.forEach(function(item)
                           {
                             pageName = item.snippet.title.toString();
-                            description = item.snippet.description.toString();
+                            description = item.snippet.description.toString().replace(/\r/g, "");
                             uploadDate = item.snippet.publishedAt.toString();
                             length = item.contentDetails.duration.toString();
                           });
+    
+    // Add labels if needed.
+    if (description.indexOf("Composers: ") != -1)
+    {
+      description = description.replace("Composers: ", "Composer: ");
+      composerLabel = "\n|composer label= Composers";
+    }
+    else if (description.indexOf("Arrangement: ") != -1)
+    {
+      description = description.replace("Arrangement: ", "Composer: ");
+      composerLabel = "\n|composer label= Arrangement";
+    }
 
+    if (description.indexOf("Platforms: ") != -1)
+    {
+      description = description.replace("Platforms: ", "Platform: ");
+      platformLabel = "\n|platform label= Platforms";
+    }
+
+    // Use regular expressions to get the necessary information from the description.
+    var playlistIdPattern = new RegExp("Playlist: (.*)\n");
+    var composerPattern = new RegExp("Composer: (.*)\n");
+    var platformPattern = new RegExp("Platform: (.*)\n");
+    
+    if (description.indexOf("\n\n") != -1)
+      var ripperPattern = new RegExp("Ripper: (.*)\n");
+    else
+    {
+      var ripperPattern = new RegExp("Ripper: (.*)");
+      catchphrase = "\n|catchphrase= ";
+    }
+
+    description = description.replace(/,/g, "COMMA");
+    
+    if (description.indexOf("Playlist: ") != -1)
+      playlistId = playlistIdPattern.exec(description).toString().split(",").pop();
+    
+    if (description.indexOf("Ripper: ") != -1)
+      ripper = ripperPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",");
+    
+    if (description.indexOf("Composer: ") != -1)
+      composer = "\n|composer= " + composerPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",");
+    
+    if (description.indexOf("Platform: ") != -1)
+      platform = "\n|platform= " + platformPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",");
+    
+    if (description.indexOf("Please read the channel description.") == -1 && description.indexOf("\n\n") != -1)
+      catchphrase = "\n|catchphrase= " + description.split("\n\n").pop();
+    
+    // Format the video length, adding zeroes if needed.
     for (var i = 0; i < length.length; i++)
     {
       if (length.charAt(i) == "T" && length.charAt(i+2) == "S")
@@ -61,142 +110,56 @@ function buildTemplate(id)
 
     length = length.replace("PT", "").replace("H", ":").replace("M", ":").replace("S", "");
     
+    // Format the upload date.
     uploadDate = Utilities.formatDate(new Date(uploadDate), "GMT-5", "MMMM d, yyyy");
-
-    // Put the title, description, and ID into the template.
-    var temp = pageName.split("");
-    var copy = "";
-    var lastHyphenLine = 0;
-    i = 0;
     
-    for (i in temp)
-      if (temp[i] == "-")
-        lastHyphenLine = i;
+    // Seperate the rip title into four parts: full title, song title, game title, and mix.
+    pageName = pageName.split(" - ");
     
-    i = 0;
-    
-    for (i in temp)
+    for (i = 0; i < pageName.length - 1; i++)
     {
-      copy += temp[i].toString();
+      track += pageName[i] + " - ";
+      game = pageName[i+1];
+    }
+    
+    pageName = pageName.join(" - ");
+    track = track.substring(0, track.length - 3);
+    simplifiedTrack = track;
+    
+    if (track.indexOf("(") != -1 && (track.indexOf("Mix)") != -1 || track.indexOf("Version)") != -1))
+    {
+      var simplifiedTrackPattern = new RegExp(/(.*) \(/);
+      track = track.replace(/,/g, "COMMA");
+      simplifiedTrack = simplifiedTrackPattern.exec(track).toString().split(",").pop().replace(/COMMA/g, ",");
+      simplifiedTrack = simplifiedTrack.replace(/COMMA/g, ",");
+      track = track.replace(/COMMA/g, ",");      
       
-      if (copy.indexOf(" - ") != -1 && parseInt(i) > parseInt(lastHyphenLine))
-        game.push(temp[i]);
-      else if (copy.indexOf("(") != -1)
-      {
-        mix.push(temp[i]);
-        track.push(temp[i]);
-      } else
-        track.push(temp[i]);
+      mix = track.replace(simplifiedTrack + " ", "").replace(/\(/g, "of the ").replace(/\)/g, " ").replace(/Mix/g, "mix").replace(/Version/g, "version");
     }
     
-    track.pop();
-    track.pop();
-    game.shift();
-    mix.shift();
-    mix = mix.join("");
-    simplifiedTrack = track.join("");
-    simplifiedTrack = simplifiedTrack.split("");
-    
-    for (i = 0; i < mix.length; i++)
-      simplifiedTrack.pop();
-    
-    if (mix.indexOf("Version)") != -1)
-    {
-      mix = mix.split("");
-      for (i = 0; i < 10; i++)
-        mix.pop();
-      mix = "of the " + mix.join("") + "version ";
-    } else if (mix.indexOf("Mix)") != -1)
-    {
-      mix = mix.split("");
-      for (i = 0; i < 6; i++)
-        mix.pop();
-      mix = "of the " + mix.join("") + "mix ";
-    }/* else if (mix.indexOf(")") != -1)
-    {
-      mix = mix.split("");
-      for (i = 0; i < 3; i++)
-        mix.pop();
-      mix = "of the " + mix.join("") + " ";
-    }*/ else
-    {
-      mix = "";
-      simplifiedTrack = track;
-    }
-    
-    var ignoreCatchphrase = false;
-    if (description.indexOf("Please read the channel description.") != -1)
-    {
-      description = description.replace("Please read the channel description.", "");
-      catchphrase = "";
-      ignoreCatchphrase = true;
-    }
-    
-    temp = description.split("");
-    //Logger.log(temp);
-    copy = "";
-    i = 0;
-
-    for (i in temp)
-    {
-      copy += temp[i].toString();
-      if (copy.indexOf("\n\n") != -1 && !ignoreCatchphrase)
-        catchphrase.push(temp[i]);
-      else if (copy.indexOf("Ripper: ") != -1)
-        ripper.push(temp[i]);
-      else if (copy.indexOf("Platform: ") != -1)
-        platform.push(temp[i]);
-      else if (copy.indexOf("Playlist: ") != -1) 
-        playlistId.push(temp[i]);
-      else if (copy.indexOf("Composer: ") != -1)
-        composer.push(temp[i]);
-    }
-    platform.pop();
-    
-    if (!ignoreCatchphrase)
-    {
-      catchphrase.shift();
-      catchphrase = "\n|catchphrase= " + catchphrase.join("");
-    } else
-    {
-      if (ripper.length != 0)
-        ripper.pop();
-      else
-        platform.pop();
-    }
-
-    
-    for (i = 0; i < 10; i++)
-    {
-      composer.pop();
-      playlistId.pop();
-    }
-        
-    if (ripper.length != 0)
-      for (i = 0; i < 7; i++)
-        platform.pop();
-
-    // Print the template to the sheet.
+    // Build the template.
     var val = "{{Rip" +
-              "\n|image= " + game.join("") + ".jpg" + 
+              "\n|image= " + game + ".jpg" + 
+                
               "\n\n|link= " + videoId + 
-              "\n|playlist= " + game.join("") +
-              "\n|playlist id=" + playlistId.join("").replace(/h.*=/, "") +
+              "\n|playlist= " + game +
+              "\n|playlist id= " + playlistId.replace(/h.*=/, "") +
               "\n|upload= " + uploadDate +
               "\n|length= " + length +
-              "\n|author=" + ripper.join("") +
+              "\n|author= " + ripper +
               "\n" +
-              "\n|album=" +
-              "\n|track=" +
+              "\n|album= " +
+              "\n|track= " +
               "\n" +
-              "\n|music= " + track.join("") +
-              "\n|composer=" + composer.join("") +
-              "\n|platform=" + platform.join("") +
-              //* "\n|ripper=" + */ ripper +
+              "\n|music= " + track +
+              /* "\n|composer= " + */ composer +
+              /* "\n|composer label= " + */ composerLabel +
+              /* "\n|platform= " + */ platform +
+              /* "\n|platform label= " + */ platformLabel +
               /* "\n|catchphrase= " + */ catchphrase +
               "\n}}" +
               "\n\"\'\'\'" + pageName + "\'\'\'\" is a high quality rip " + mix +
-              "of \"" + simplifiedTrack.join("") + "\" from \'\'" + game.join("") + "\'\'." +
+              "of \"" + simplifiedTrack + "\" from \'\'" + game + "\'\'." +
               "\n== Jokes ==" +
               "\n\n" + imageEmbed;
     
@@ -209,6 +172,7 @@ function buildTemplate(id)
     range.setValue(e); 
     Logger.log(e);
     console.log(e);
+    return e;
   }
 
   return val.replace(/\n/g, "<br>");
