@@ -1,8 +1,6 @@
 
 function buildTemplate(id)
 {
-  var range = SpreadsheetApp.getActiveSheet().getRange('A1');
-
   var description = "";
   var videoId = JSON.stringify(id).replace("{\"\":\"", "").replace("\"}", "").replace("&feature=youtu.be", "").replace(/&.*/, "").replace(/h.*=/, "");
   //var videoId = "P-NswzsNhro";
@@ -57,6 +55,16 @@ function buildTemplate(id)
     {
       description = description.replace("Arrangement: ", "Composer: ");
       composerLabel = "\n|composer label= Arrangement";
+    }
+    else if (description.indexOf("Arrangers: ") != -1)
+    {
+      description = description.replace("Arrangers: ", "Composer: ");
+      composerLabel = "\n|composer label= Arrangers";
+    }
+    else if (description.indexOf("Composed by: ") != -1)
+    {
+      description = description.replace("Composed by: ", "Composer: ");
+      composerLabel = "\n|composer label= Composed by";
     }
 
     if (description.indexOf("Platforms: ") != -1)
@@ -162,8 +170,6 @@ function buildTemplate(id)
               "of \"" + simplifiedTrack + "\" from \'\'" + game + "\'\'." +
               "\n== Jokes ==" +
               "\n\n" + imageEmbed;
-    
-    range.setValue(val);
     
     Logger.log(val);
     console.log(val);
