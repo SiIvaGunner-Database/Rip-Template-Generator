@@ -147,9 +147,9 @@ function buildTemplate(id)
     
     // Build the template.
     var val = "{{Rip" +
-              "\n|image= " + game + ".jpg" + 
-                
-              "\n\n|link= " + videoId + 
+              "\n|image= " + game + ".jpg" +
+              "\n" +
+              "\n|link= " + videoId +
               "\n|playlist= " + game +
               "\n|playlist id= " + playlistId.replace(/h.*=/, "") +
               "\n|upload= " + uploadDate +
