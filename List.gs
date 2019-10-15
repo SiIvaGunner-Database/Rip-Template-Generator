@@ -1,11 +1,10 @@
-
 function retrieveUploads() 
 {
   var startTime = new Date();
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   var uploadsSheet = spreadsheet.getSheetByName("SiIvaGunner");
-  var results = YouTube.Channels.list('contentDetails', {id: "UC9ecwl3FTG66jIKA9JRDtmg"});
   var currentTotal = spreadsheet.getSheetByName("Summary").getRange("B1").getValue();
+  var results = YouTube.Channels.list('contentDetails', {id: "UC9ecwl3FTG66jIKA9JRDtmg"});
   var row = 1;
   var scheduled = false;
   
@@ -26,7 +25,7 @@ function retrieveUploads()
                                                           pageToken: nextPageToken
                                                         });
       
-      for (var j = 0; j < playlistResponse.items.length; j++) 
+      for (var j = 0; j < playlistResponse.items.length; j++)
       {
         row++;
         if (row > currentTotal + 1)
@@ -34,6 +33,7 @@ function retrieveUploads()
           var playlistItem = playlistResponse.items[j];
           var title = playlistItem.snippet.title;
           var id = playlistItem.snippet.resourceId.videoId;
+          var publishDate = playlistItem.snippet.publishedAt;
           
           var wikiUrl = "https://siivagunner.fandom.com/wiki/" + title;
           wikiUrl = wikiUrl.replace(/ /g, "_");
@@ -41,6 +41,7 @@ function retrieveUploads()
           wikiUrl = wikiUrl.replace(/#/g, "");
           wikiUrl = wikiUrl.replace(/&/g, "%26");
           wikiUrl = wikiUrl.replace(/'/g, "%27");
+          wikiUrl = wikiUrl.replace(/\?/g, "%3F");
           
           try 
           {
@@ -54,13 +55,14 @@ function retrieveUploads()
           }
           
           uploadsSheet.getRange(row, 3).setFormula('=HYPERLINK("https://www.youtube.com/watch?v=' + id + '", "' + id + '")');
+          uploadsSheet.getRange(row, 4).setValue(publishDate);
           Logger.log("Row " + row + ": " + title);
           console.log("Row " + row + ": " + title);
         }
         nextPageToken = playlistResponse.nextPageToken;
         // Check if the script timer has passed 350 seconds
         var currentTime = new Date();
-        if (currentTime.getTime() - startTime.getTime() > 350000 && !scheduled)
+        if (currentTime.getTime() - startTime.getTime() > (5*350000) && !scheduled)
         {
           var allTriggers = ScriptApp.getProjectTriggers();
           for (var i = 0; i < allTriggers.length; i++)

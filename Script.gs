@@ -1,4 +1,3 @@
-
 function buildTemplate(id)
 {
   var description = "";
