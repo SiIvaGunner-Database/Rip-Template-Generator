@@ -28,14 +28,12 @@
       
       function copyTemplate()
       {
-        var response = document.getElementById("response");
         var copyText = document.getElementById("template");
         
         copyText.select();
         copyText.setSelectionRange(0, 99999); // For mobile devices
         
         document.execCommand("copy");
-        response.innerHTML = "Copied template";
       }
       
     </script>
@@ -45,7 +43,6 @@
       <input type = "text" id = "textBox" placeholder="Video ID"/>
       <input type = "button" id = "submitBtn" onClick="formSubmit()" value = "Submit"/>
       <button onclick="copyTemplate()">Copy</button>
-      <div id = "response"></div>
     </form>
     <textarea readonly id = "template" rows = "20"></textarea>
     <div id = "thumbnail"></div>
