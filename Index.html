@@ -2,9 +2,15 @@
 <html>
   <head>
     <base target="_top">
-    <script type="text/javascript">
+    <style>
       
-      // https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
+      textarea {
+        width: 100%;
+        border: none;
+      }
+      
+    </style>
+    <script type="text/javascript">
 
       function formSubmit()
       {
@@ -13,8 +19,23 @@
       
       function onSuccess(val)
       {
-        var div = document.getElementById("output");
-        div.innerHTML = val;
+        var template = document.getElementById("template");
+        var thumbnail = document.getElementById("thumbnail");
+        
+        template.innerHTML = val[0];
+        thumbnail.innerHTML = val[1];
+      }
+      
+      function copyTemplate()
+      {
+        var response = document.getElementById("response");
+        var copyText = document.getElementById("template");
+        
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // For mobile devices
+        
+        document.execCommand("copy");
+        response.innerHTML = "Copied template";
       }
       
     </script>
@@ -23,7 +44,10 @@
     <form>
       <input type = "text" id = "textBox" placeholder="Video ID"/>
       <input type = "button" id = "submitBtn" onClick="formSubmit()" value = "Submit"/>
+      <button onclick="copyTemplate()">Copy</button>
+      <div id = "response"></div>
     </form>
-    <div id = "output"></div>
+    <textarea readonly id = "template" rows = "20"></textarea>
+    <div id = "thumbnail"></div>
   </body>
 </html>

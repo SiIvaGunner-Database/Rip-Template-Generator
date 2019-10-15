@@ -167,8 +167,7 @@ function buildTemplate(id)
               "\n}}" +
               "\n\"\'\'\'" + pageName + "\'\'\'\" is a high quality rip " + mix +
               "of \"" + simplifiedTrack + "\" from \'\'" + game + "\'\'." +
-              "\n== Jokes ==" +
-              "\n\n" + imageEmbed;
+              "\n== Jokes ==";
     
     Logger.log(val);
     console.log(val);
@@ -180,7 +179,7 @@ function buildTemplate(id)
     return e;
   }
 
-  return val.replace(/\n/g, "<br>");
+  return [val, imageEmbed];
 } 
 
 function doGet()
