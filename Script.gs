@@ -50,6 +50,11 @@ function buildTemplate(id)
       description = description.replace("Composers: ", "Composer: ");
       composerLabel = "\n|composer label= Composers";
     }
+    else if (description.indexOf("Composer(s): ") != -1)
+    {
+      description = description.replace("Composer(s): ", "Composer: ");
+      composerLabel = "\n|composer label= Composer(s)";
+    }
     else if (description.indexOf("Arrangement: ") != -1)
     {
       description = description.replace("Arrangement: ", "Composer: ");
