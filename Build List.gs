@@ -1,21 +1,21 @@
+// Builds a spreadsheet with basic information for every SiIvaGunner video.
 function retrieveUploads() 
 {
   var startTime = new Date();
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   var uploadsSheet = spreadsheet.getSheetByName("SiIvaGunner");
   var currentTotal = spreadsheet.getSheetByName("Summary").getRange("B1").getValue();
-  var results = YouTube.Channels.list('contentDetails', {id: "UC9ecwl3FTG66jIKA9JRDtmg"});
+  var results = YouTube.channelArr.list('contentDetails', {id: "UC9ecwl3FTG66jIKA9JRDtmg"});
   var row = 1;
   var scheduled = false;
   
   for (var i in results.items) 
   {
+    // Get the uploads playlist ID.
     var item = results.items[i];
-    
-    // Get the uploads playlist ID
     var playlistId = item.contentDetails.relatedPlaylists.uploads;
-    
     var nextPageToken = '';
+    
     while (nextPageToken != null)
     {
       var playlistResponse = YouTube.PlaylistItems.list('snippet', 
@@ -34,8 +34,9 @@ function retrieveUploads()
           var title = playlistItem.snippet.title;
           var id = playlistItem.snippet.resourceId.videoId;
           var publishDate = playlistItem.snippet.publishedAt;
-          
           var wikiUrl = "https://siivagunner.fandom.com/wiki/" + title;
+          
+          
           wikiUrl = wikiUrl.replace(/ /g, "_");
           wikiUrl = wikiUrl.replace(/"/g, "\"\"");
           wikiUrl = wikiUrl.replace(/#/g, "");
@@ -43,9 +44,11 @@ function retrieveUploads()
           wikiUrl = wikiUrl.replace(/'/g, "%27");
           wikiUrl = wikiUrl.replace(/\?/g, "%3F");
           
+          // Check if the video has a wiki article.
           try 
           {
             var response = UrlFetchApp.fetch(wikiUrl).getResponseCode();
+            
             uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '", "' + title.replace(/"/g, "\"\"") + '")');
             uploadsSheet.getRange(row, 2).setValue("No");
           } catch (e)
@@ -56,15 +59,18 @@ function retrieveUploads()
           
           uploadsSheet.getRange(row, 3).setFormula('=HYPERLINK("https://www.youtube.com/watch?v=' + id + '", "' + id + '")');
           uploadsSheet.getRange(row, 4).setValue(publishDate);
+          
           Logger.log("Row " + row + ": " + title);
-          console.log("Row " + row + ": " + title);
         }
         nextPageToken = playlistResponse.nextPageToken;
-        // Check if the script timer has passed 350 seconds
+        
+        // Check if the script timer has passed a specified time limit.
         var currentTime = new Date();
+        
         if (currentTime.getTime() - startTime.getTime() > (5*350000) && !scheduled)
         {
           var allTriggers = ScriptApp.getProjectTriggers();
+          
           for (var i = 0; i < allTriggers.length; i++)
             ScriptApp.deleteTrigger(allTriggers[i]);
           
@@ -79,36 +85,3 @@ function retrieveUploads()
     }
   }
 }
-
-/*
-function retrieveTemplateValues(pageName, uploadDate, length, description)
-{
-  uploadsSheet.getRange(row, 4).setValue(playlistId);
-  uploadsSheet.getRange(row, 5).setValue(uploadDate);
-  uploadsSheet.getRange(row, 6).setValue(length);
-  uploadsSheet.getRange(row, 7).setValue(ripper);
-  uploadsSheet.getRange(row, 8).setValue(track);
-  uploadsSheet.getRange(row, 9).setValue(simplifiedTrack);
-  uploadsSheet.getRange(row, 10).setValue(game);
-  uploadsSheet.getRange(row, 11).setValue(mix);
-  uploadsSheet.getRange(row, 12).setValue(composer);
-  uploadsSheet.getRange(row, 13).setValue(composerLabel);
-  uploadsSheet.getRange(row, 14).setValue(platform);
-  uploadsSheet.getRange(row, 15).setValue(platformLabel);
-  uploadsSheet.getRange(row, 16).setValue(catchphrase);
-  
-  return [ playlistId: playlistId, +
-          uploadDate: uploadDate, +
-          length: length, +
-          ripper: ripper, +
-          track: track, +
-          simplifiedTrack: simplifiedTrack, +
-          game: game, +
-          mix: mix, +
-          composer: composer, +
-          composerLabel: composerLabel, +
-          platform: platform, +
-          platformLabel: platformLabel, +
-          catchphrase: catchphrase ];
-}
-//*/

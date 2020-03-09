@@ -1,3 +1,4 @@
+// Builds a rip template for a SiIvaGunner video.
 function buildTemplate(id)
 {
   var description = "";
@@ -28,7 +29,7 @@ function buildTemplate(id)
   
   try 
   {
-    // Fetch the video details.
+    // Retrieve the video details.
     var results = YouTube.Videos.list('id,snippet,contentDetails',
                                       {
                                         id: videoId,
@@ -175,12 +176,10 @@ function buildTemplate(id)
               "\n== Jokes ==";
     
     Logger.log(val);
-    console.log(val);
   } catch(e)
   {
     range.setValue(e); 
     Logger.log(e);
-    console.log(e);
     return e;
   }
 
