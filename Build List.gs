@@ -41,7 +41,7 @@ function buildList()
           var publishDate = playlistItem.snippet.publishedAt;
           
           var title = originalTitle.replace(/\[/g, '(').replace(/\]/g, ')').replace(/#/g, '');
-
+          
           var wikiUrl = "https://siivagunner.fandom.com/wiki/" + encodeURIComponent(title);
           
           // Check if the video has a wiki article.
@@ -53,8 +53,33 @@ function buildList()
             uploadsSheet.getRange(row, 2).setValue("No");
           } catch (e)
           {
-            uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
-            uploadsSheet.getRange(row, 2).setValue("Yes");
+            e = e.toString().replace(/\n\n/g, "\n");
+            Logger.log(e + "\n" + wikiUrl);
+            if (e.indexOf("404") != -1)
+            {
+              uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
+              uploadsSheet.getRange(row, 2).setValue("Yes");
+              //*
+              Logger.log("Add: " + title);
+              YouTube.PlaylistItems.insert
+              ({
+                snippet: 
+                {
+                  playlistId: "PLn8P5M1uNQk4_1_eaMchQE5rBpaa064ni",
+                  resourceId: 
+                  {
+                    kind: "youtube#video",
+                    videoId: id
+                  }
+                }
+              }, "snippet");
+              //*/
+            }
+            else
+            {
+              uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '", "' + originalTitle.replace(/"/g, '""') + '")');
+              uploadsSheet.getRange(row, 2).setValue("Unknown");
+            }
           }
           
           uploadsSheet.getRange(row, 3).setFormula('=HYPERLINK("https://www.youtube.com/watch?v=' + id + '", "' + id + '")');
@@ -137,23 +162,33 @@ function updateList()
           uploadsSheet.getRange(row, 2).setValue("No");
         } catch (e)
         {
-          uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
-          uploadsSheet.getRange(row, 2).setValue("Yes");
-          //*
-          Logger.log("Add: " + title);
-          YouTube.PlaylistItems.insert
-          ({
-            snippet: 
-            {
-              playlistId: "PLn8P5M1uNQk4_1_eaMchQE5rBpaa064ni",
-              resourceId: 
+          e = e.toString().replace(/\n\n/g, "\n");
+          Logger.log(e + "\n" + wikiUrl);
+          if (e.indexOf("404") != -1)
+          {
+            uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
+            uploadsSheet.getRange(row, 2).setValue("Yes");
+            //*
+            Logger.log("Add: " + title);
+            YouTube.PlaylistItems.insert
+            ({
+              snippet: 
               {
-                kind: "youtube#video",
-                videoId: id
+                playlistId: "PLn8P5M1uNQk4_1_eaMchQE5rBpaa064ni",
+                resourceId: 
+                {
+                  kind: "youtube#video",
+                  videoId: id
+                }
               }
-            }
-          }, "snippet");
-          //*/
+            }, "snippet");
+            //*/
+          }
+          else
+          {
+            uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '", "' + originalTitle.replace(/"/g, '""') + '")');
+            uploadsSheet.getRange(row, 2).setValue("Unknown");
+          }
         }
         uploadsSheet.getRange(row, 3).setFormula('=HYPERLINK("https://www.youtube.com/watch?v=' + id + '", "' + id + '")');
         uploadsSheet.getRange(row, 4).setValue(publishDate);
@@ -175,6 +210,10 @@ function updateList()
 function updateArticleStatuses()
 {
   var startTime = new Date();
+  
+  if (checkRips)
+    updateList();
+  
   var yesToNo =[];
   var noToYes =[];
   var errorLog =[];
@@ -185,12 +224,12 @@ function updateArticleStatuses()
   while (ready)
   {
     if (row == currentTotal + 1)
-        row = 2;
+      row = 2;
     else
       row++;
     
     var originalTitle = uploadsSheet.getRange(row, 1).getValue();
-    var title = originalTitle.replace(/\[/g, '(').replace(/\]/g, ')').replace(/#/g, '');
+    var title = format(originalTitle);
     var wikiUrl = "https://siivagunner.fandom.com/wiki/" + encodeURIComponent(title);
     var oldStatus = uploadsSheet.getRange(row, 2).getValue();
     var id = uploadsSheet.getRange(row, 3).getValue();
@@ -204,26 +243,29 @@ function updateArticleStatuses()
       uploadsSheet.getRange(row, 2).setValue("No");
     } catch (e)
     {
-      errorLog.push(e + " (" + wikiUrl + ")");
-      Logger.log(e + " (" + wikiUrl + ")");
-      uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
-      uploadsSheet.getRange(row, 2).setValue("Yes");
+      e = e.toString().replace(/\n\n/g, "\n");
+      errorLog.push(e + "\n[" + wikiUrl + "]");
+      Logger.log(e + "\n" + wikiUrl);
+      if (e.indexOf("404") != -1)
+      {
+        uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
+        uploadsSheet.getRange(row, 2).setValue("Yes");
+      }
     }
-
+    
     var newStatus = uploadsSheet.getRange(row, 2).getValue();
     
     if (oldStatus != newStatus && newStatus == "No") // The rip no longer needs an article
     {
       yesToNo.push(originalTitle + " (" + response + ")");
       Logger.log("Remove from playlist: " + originalTitle);
-      //var videoResponse = YouTube.PlaylistItems.list('snippet', {playlistId: playlistId, videoId: id});
-      //var deletionId = videoResponse.items[0].id;
-      //YouTube.PlaylistItems.remove(deletionId);
+      var videoResponse = YouTube.PlaylistItems.list('snippet', {playlistId: playlistId, videoId: id});
+      var deletionId = videoResponse.items[0].id;
+      YouTube.PlaylistItems.remove(deletionId);
     }
-    else if (/*oldStatus != newStatus &&*/ newStatus == "Yes") // The rip needs an article
+    else if (oldStatus != newStatus && newStatus == "Yes") // The rip needs an article
     {
-      if (oldStatus != newStatus && newStatus == "Yes")
-        noToYes.push(originalTitle + " (" + response + ")");
+      noToYes.push(originalTitle + " (" + response + ")");
       
       Logger.log("Add to playlist: " + originalTitle);
       YouTube.PlaylistItems.insert
@@ -248,26 +290,18 @@ function updateArticleStatuses()
     
     if (currentTime.getTime() - startTime.getTime() > (10 * 60 * 500)) // 5 minutes
     {
-      var allTriggers = ScriptApp.getProjectTriggers();
-      for (var i = 0; i < allTriggers.length; i++)
-        ScriptApp.deleteTrigger(allTriggers[i]);
-      
-      ScriptApp.newTrigger("updateArticleStatuses")
-      .timeBased()
-      .after(10 * 60 * 500) // 5 minutes
-      .create();
-      
       if (noToYes.length > 0 || yesToNo.length > 0 || errorLog.length > 0)
       {
         var emailAddress = 'a.k.zamboni@gmail.com';
         var subject = 'List of Uploads Update';
         var message = noToYes.length + ' rips were changed from no to yes.\n\t' + noToYes.toString().replace(/,/g, '\n\t')
-        + '\n\n' + yesToNo.length + ' rips were changed from yes to no.\n\t' + yesToNo.toString().replace(/,/g, '\n\t');
+        + '\n\n' + yesToNo.length + ' rips were changed from yes to no.\n\t' + yesToNo.toString().replace(/,/g, '\n\t')
+        + '\n\n' + errorLog.length + ' errors occured.\n' + errorLog.toString().replace(/,/g, '\n\n');
         
         MailApp.sendEmail(emailAddress, subject, message);
         Logger.log("Email successfully sent. " + message);
       }
-
+      
       ready = false;
     }
   }
@@ -311,23 +345,49 @@ function checkRips()
       }
     }
   }
+  
   if (missingRip)
   {
+    /*
     var emailAddress = 'a.k.zamboni@gmail.com';
     var subject = 'Missing Rips Update';
     var message = 'The following rips are missing from the spreadsheet:\n\t' + missingRipList.toString().replace(/,/g, '\n\t');
     
     MailApp.sendEmail(emailAddress, subject, message);
     Logger.log("Email successfully sent. " + message);
+    //*/
+    Logger.log(message);
+    return true;
   }
   else
+  {
     Logger.log("There are no rips missing from the spreadsheet.");
+    return false;
+  }
+}
+
+function createTrigger()
+{
+  ScriptApp.newTrigger("updateArticleStatuses")
+  .timeBased()
+  .everyMinutes(10)
+  .create();
+}
+
+function format(str)
+{
+  str = str.replace(/\[/g, '(');
+  str = str.replace(/\]/g, ')');
+  str = str.replace(/#/g, '');
+  //str = str.replace(/\​\|\​_/g, 'L'); //Fix this!
+  return str;
 }
 
 function test()
 {
-  var originalTitle = "Chemical Plant Zone Act 1 - Sonic Mania";
-  var title = originalTitle.replace(/\[/g, '(').replace(/\]/g, ')').replace(/#/g, '');
+  var originalTitle = "$4cR1f1c14​|​_ - The Binding of Isaac";
+  var title = format(originalTitle);
+  Logger.log(title);
   var url = "https://siivagunner.fandom.com/wiki/" + encodeURIComponent(title);
   try 
   {
@@ -336,6 +396,10 @@ function test()
     Logger.log("Success: response code " + response);
   } catch (e)
   {
+    e = e.toString().replace(/\n\n/g, "\n");
+    if (e.indexOf("404") != -1)
+        Logger.log("Error 404");
+    Logger.log(e);
     Logger.log("Failure: response code " + response);
   }
   Logger.log(url);
