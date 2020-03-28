@@ -186,6 +186,7 @@ function updateList()
           }
           else
           {
+            errorLog.push(e + "\n[" + wikiUrl + "]");
             uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '", "' + originalTitle.replace(/"/g, '""') + '")');
             uploadsSheet.getRange(row, 2).setValue("Unknown");
           }
@@ -244,13 +245,14 @@ function updateArticleStatuses()
     } catch (e)
     {
       e = e.toString().replace(/\n\n/g, "\n");
-      errorLog.push(e + "\n[" + wikiUrl + "]");
       Logger.log(e + "\n" + wikiUrl);
       if (e.indexOf("404") != -1)
       {
         uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
         uploadsSheet.getRange(row, 2).setValue("Yes");
       }
+      else
+        errorLog.push(e + "\n[" + wikiUrl + "]");
     }
     
     var newStatus = uploadsSheet.getRange(row, 2).getValue();
@@ -259,9 +261,18 @@ function updateArticleStatuses()
     {
       yesToNo.push(originalTitle + " (" + response + ")");
       Logger.log("Remove from playlist: " + originalTitle);
-      var videoResponse = YouTube.PlaylistItems.list('snippet', {playlistId: playlistId, videoId: id});
-      var deletionId = videoResponse.items[0].id;
-      YouTube.PlaylistItems.remove(deletionId);
+      try
+      {
+        var videoResponse = YouTube.PlaylistItems.list('snippet', {playlistId: playlistId, videoId: id});
+        var deletionId = videoResponse.items[0].id;
+        YouTube.PlaylistItems.remove(deletionId);
+      }
+      catch (e)
+      {
+        e = e.toString().replace(/\n\n/g, "\n");
+        Logger.log(e + "\n" + wikiUrl);
+        errorLog.push(e + "\n[" + wikiUrl + "]");
+      }
     }
     else if (oldStatus != newStatus && newStatus == "Yes") // The rip needs an article
     {
