@@ -186,9 +186,10 @@ function updateList()
           }
           else
           {
-            errorLog.push(e + "\n[" + wikiUrl + "]");
             uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '", "' + originalTitle.replace(/"/g, '""') + '")');
             uploadsSheet.getRange(row, 2).setValue("Unknown");
+            if (e.indexOf("Address unavailable") == -1)
+              errorLog.push(e + "\n[" + wikiUrl + "]");
           }
         }
         uploadsSheet.getRange(row, 3).setFormula('=HYPERLINK("https://www.youtube.com/watch?v=' + id + '", "' + id + '")');
@@ -251,7 +252,7 @@ function updateArticleStatuses()
         uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
         uploadsSheet.getRange(row, 2).setValue("Yes");
       }
-      else
+      else if (e.indexOf("Address unavailable") == -1)
         errorLog.push(e + "\n[" + wikiUrl + "]");
     }
     
