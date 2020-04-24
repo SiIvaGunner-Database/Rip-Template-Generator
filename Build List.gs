@@ -106,7 +106,7 @@ function buildList()
 
           scheduled = true;
         }
-        uploadsSheet.getRange("A2:P20000").sort({column: 4, ascending: false});
+        uploadsSheet.getRange("A2:P19000").sort({column: 4, ascending: false});
         if (scheduled) break;
       }
       if (scheduled) break;
@@ -123,7 +123,7 @@ function buildList()
 
 function updateList() 
 {
-  uploadsSheet.getRange("A2:P20000").sort({column: 4, ascending: false});
+  uploadsSheet.getRange("A2:P19000").sort({column: 4, ascending: false});
   
   var currentTotal = summarySheet.getRange("B1").getValue();
   var mostRecent = uploadsSheet.getRange("D2").getValue();
@@ -204,7 +204,7 @@ function updateList()
   }
   var lastUpdatedRow = summarySheet.getRange("B5").getValue();
   summarySheet.getRange("B5").setValue(lastUpdatedRow + newRipCount);
-  uploadsSheet.getRange("A2:P20000").sort({column: 4, ascending: false});
+  uploadsSheet.getRange("A2:P19000").sort({column: 4, ascending: false});
   Logger.log(newRipCount);
 }
 
@@ -216,9 +216,9 @@ function updateArticleStatuses()
   if (checkRips)
     updateList();
   
-  var yesToNo =[];
-  var noToYes =[];
-  var errorLog =[];
+  var yesToNo = [];
+  var noToYes = [];
+  var errorLog = [];
   var currentTotal = summarySheet.getRange("B1").getValue();
   var row = summarySheet.getRange("B5").getValue();
   var ready = true;
@@ -302,18 +302,23 @@ function updateArticleStatuses()
     
     if (currentTime.getTime() - startTime.getTime() > (10 * 60 * 500)) // 5 minutes
     {
-      if (noToYes.length > 0 || yesToNo.length > 0 || errorLog.length > 0)
+      if (noToYes.length > 0 || errorLog.length > 0)
       {
         var emailAddress = 'a.k.zamboni@gmail.com';
         var subject = 'List of Uploads Update';
-        var message = noToYes.length + ' rips were changed from no to yes.\n\t' + noToYes.toString().replace(/,/g, '\n\t')
-        + '\n\n' + yesToNo.length + ' rips were changed from yes to no.\n\t' + yesToNo.toString().replace(/,/g, '\n\t')
-        + '\n\n' + errorLog.length + ' errors occured.\n' + errorLog.toString().replace(/,/g, '\n\n');
+        var beginning = '';
+        var end = '';
+        
+        if (noToYes.length > 0)
+          beginning = noToYes.length + ' rips were changed from no to yes.\n\t' + noToYes.toString().replace(/,/g, '\n\t') + '\n\n';
+        if (errorLog.length > 0)
+          end = errorLog.length + ' errors occured.\n' + errorLog.toString().replace(/,/g, '\n\n');
+        
+        var message = beginning + end;
         
         MailApp.sendEmail(emailAddress, subject, message);
         Logger.log("Email successfully sent. " + message);
       }
-      
       ready = false;
     }
   }
@@ -321,7 +326,7 @@ function updateArticleStatuses()
 
 function checkRips()
 {
-  uploadsSheet.getRange("A2:P20000").sort({column: 4, ascending: false});
+  uploadsSheet.getRange("A2:P19000").sort({column: 4, ascending: false});
   var stop = false;
   var missingRip = false;
   var missingRipList = [];
@@ -359,30 +364,21 @@ function checkRips()
   }
   
   if (missingRip)
-  {
-    /*
-    var emailAddress = 'a.k.zamboni@gmail.com';
-    var subject = 'Missing Rips Update';
-    var message = 'The following rips are missing from the spreadsheet:\n\t' + missingRipList.toString().replace(/,/g, '\n\t');
-    
-    MailApp.sendEmail(emailAddress, subject, message);
-    Logger.log("Email successfully sent. " + message);
-    //*/
-    Logger.log(message);
     return true;
-  }
   else
-  {
-    Logger.log("There are no rips missing from the spreadsheet.");
     return false;
-  }
+}
+
+// Make this work!
+function checkRipStatus()
+{
 }
 
 function createTrigger()
 {
   ScriptApp.newTrigger("updateArticleStatuses")
   .timeBased()
-  .everyMinutes(10)
+  .everyMinutes(30)
   .create();
 }
 
