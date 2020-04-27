@@ -193,6 +193,10 @@ function updateList()
           }
         }
         uploadsSheet.getRange(row, 3).setFormula('=HYPERLINK("https://www.youtube.com/watch?v=' + id + '", "' + id + '")');
+        
+        if (publishDate.length == 20)
+          publishDate = publishDate.replace("Z", ".000Z");
+        
         uploadsSheet.getRange(row, 4).setValue(publishDate);
         //*/
         Logger.log("Row " + row + ": " + originalTitle + " - " + publishDate);
@@ -213,7 +217,7 @@ function updateArticleStatuses()
 {
   var startTime = new Date();
   
-  if (checkRips)
+  if (checkRips())
     updateList();
   
   var yesToNo = [];
@@ -345,6 +349,7 @@ function checkRips()
       var playlistItem = playlistResponse.items[j];
       var title = playlistItem.snippet.title;
       var id = playlistItem.snippet.resourceId.videoId;
+      Logger.log("Video ID: \t" + id);
 
       stop = false;
       k = 0;
@@ -354,6 +359,7 @@ function checkRips()
           stop = true;
         else if (k == 99)
         {
+          Logger.log("Missing rip found.\t" + recentRipIds);
           stop = true;
           missingRip = true;
           missingRipList.push(title);
