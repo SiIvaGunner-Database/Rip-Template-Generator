@@ -172,7 +172,7 @@ function updateList()
     
     if (oldStatus != newStatus && newStatus == "No") // The rip no longer needs an article
     {
-      yesToNo.push(originalTitle + " (" + response + ")");
+      yesToNo.push(originalTitle);
       Logger.log("Remove from playlist: " + originalTitle);
       try
       {
@@ -189,7 +189,7 @@ function updateList()
     }
     else if (oldStatus != newStatus && newStatus == "Yes") // The rip needs an article
     {
-      noToYes.push(originalTitle + " (" + response + ")");
+      noToYes.push(originalTitle);
       
       Logger.log("Add to playlist: " + originalTitle);
       YouTube.PlaylistItems.insert
@@ -341,9 +341,8 @@ function format(str)
   str = str.replace(/\]/g, ')');
   str = str.replace(/#/g, '');
   str = str.replace(/\​\|\​_/g, 'L');
-  str = encodeURIComponent(str);
-  str = str.replace(/%7C/g, '|');
-  return str;
+  str = str.replace(/\|/g, '∣');
+  return encodeURIComponent(str);
 }
 
 function formatTester()
