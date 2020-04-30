@@ -2,6 +2,7 @@ var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 var uploadsSheet = spreadsheet.getSheetByName("List of Rips");
 var summarySheet = spreadsheet.getSheetByName("Summary");
 var playlistId = "PLn8P5M1uNQk4_1_eaMchQE5rBpaa064ni";
+var errorLog = [];
 
 // Builds a spreadsheet with basic information for every SiIvaGunner video.
 function buildList() 
@@ -37,50 +38,13 @@ function buildList()
         {
           var playlistItem = playlistResponse.items[j];
           var originalTitle = playlistItem.snippet.title;
+          var encodedTitle = format(originalTitle);
           var id = playlistItem.snippet.resourceId.videoId;
           var publishDate = playlistItem.snippet.publishedAt;
           
-          var title = originalTitle.replace(/\[/g, '(').replace(/\]/g, ')').replace(/#/g, '');
+          var url = "https://siivagunner.fandom.com/wiki/" + encodedTitle;
           
-          var wikiUrl = "https://siivagunner.fandom.com/wiki/" + encodeURIComponent(title);
-          
-          // Check if the video has a wiki article.
-          try 
-          {
-            var response = UrlFetchApp.fetch(wikiUrl).getResponseCode();
-            
-            uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '", "' + originalTitle.replace(/"/g, '""') + '")');
-            uploadsSheet.getRange(row, 2).setValue("No");
-          } catch (e)
-          {
-            e = e.toString().replace(/\n\n/g, "\n");
-            Logger.log(e + "\n" + wikiUrl);
-            if (e.indexOf("404") != -1)
-            {
-              uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
-              uploadsSheet.getRange(row, 2).setValue("Yes");
-              //*
-              Logger.log("Add: " + title);
-              YouTube.PlaylistItems.insert
-              ({
-                snippet: 
-                {
-                  playlistId: "PLn8P5M1uNQk4_1_eaMchQE5rBpaa064ni",
-                  resourceId: 
-                  {
-                    kind: "youtube#video",
-                    videoId: id
-                  }
-                }
-              }, "snippet");
-              //*/
-            }
-            else
-            {
-              uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '", "' + originalTitle.replace(/"/g, '""') + '")');
-              uploadsSheet.getRange(row, 2).setValue("Unknown");
-            }
-          }
+          checkStatus(row, url, originalTitle, id, true);
           
           uploadsSheet.getRange(row, 3).setFormula('=HYPERLINK("https://www.youtube.com/watch?v=' + id + '", "' + id + '")');
           uploadsSheet.getRange(row, 4).setValue(publishDate);
@@ -121,7 +85,8 @@ function buildList()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function updateList() 
+// Add new rips to list.
+function addToList() 
 {
   uploadsSheet.getRange("A2:P19000").sort({column: 4, ascending: false});
   
@@ -139,7 +104,7 @@ function updateList()
     var playlistId = item.contentDetails.relatedPlaylists.uploads;
     var playlistResponse = YouTube.PlaylistItems.list('snippet', {playlistId: playlistId, maxResults: 50});
     
-    Logger.log(mostRecent);
+    Logger.log("Most recent upload date: " + mostRecent);
     for (var j = 0; j < playlistResponse.items.length; j++)
     {
       var playlistItem = playlistResponse.items[j];
@@ -147,56 +112,18 @@ function updateList()
       var id = playlistItem.snippet.resourceId.videoId;
       var publishDate = playlistItem.snippet.publishedAt;
       
+      if (publishDate.length == 20)
+        publishDate = publishDate.replace("Z", ".000Z");
+      
       if (publishDate > mostRecent)
       {
         //*
-        var title = originalTitle.replace(/\[/g, '(').replace(/\]/g, ')').replace(/#/g, '');
-        var wikiUrl = "https://siivagunner.fandom.com/wiki/" + encodeURIComponent(title);
+        var encodedTitle = format(originalTitle);
+        var url = "https://siivagunner.fandom.com/wiki/" + encodedTitle;
         
-        // Check if the video has a wiki article.
-        try 
-        {
-          var response = UrlFetchApp.fetch(wikiUrl).getResponseCode();
-          
-          uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '", "' + originalTitle.replace(/"/g, '""') + '")');
-          uploadsSheet.getRange(row, 2).setValue("No");
-        } catch (e)
-        {
-          e = e.toString().replace(/\n\n/g, "\n");
-          Logger.log(e + "\n" + wikiUrl);
-          if (e.indexOf("404") != -1)
-          {
-            uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
-            uploadsSheet.getRange(row, 2).setValue("Yes");
-            //*
-            Logger.log("Add: " + title);
-            YouTube.PlaylistItems.insert
-            ({
-              snippet: 
-              {
-                playlistId: "PLn8P5M1uNQk4_1_eaMchQE5rBpaa064ni",
-                resourceId: 
-                {
-                  kind: "youtube#video",
-                  videoId: id
-                }
-              }
-            }, "snippet");
-            //*/
-          }
-          else
-          {
-            uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '", "' + originalTitle.replace(/"/g, '""') + '")');
-            uploadsSheet.getRange(row, 2).setValue("Unknown");
-            if (e.indexOf("Address unavailable") == -1)
-              errorLog.push(e + "\n[" + wikiUrl + "]");
-          }
-        }
+        checkStatus(row, url, originalTitle, id, true);
+
         uploadsSheet.getRange(row, 3).setFormula('=HYPERLINK("https://www.youtube.com/watch?v=' + id + '", "' + id + '")');
-        
-        if (publishDate.length == 20)
-          publishDate = publishDate.replace("Z", ".000Z");
-        
         uploadsSheet.getRange(row, 4).setValue(publishDate);
         //*/
         Logger.log("Row " + row + ": " + originalTitle + " - " + publishDate);
@@ -209,20 +136,19 @@ function updateList()
   var lastUpdatedRow = summarySheet.getRange("B5").getValue();
   summarySheet.getRange("B5").setValue(lastUpdatedRow + newRipCount);
   uploadsSheet.getRange("A2:P19000").sort({column: 4, ascending: false});
-  Logger.log(newRipCount);
+  Logger.log("New rips: " + newRipCount);
 }
 
-
-function updateArticleStatuses()
+// Update rip values and add missing rips.
+function updateList()
 {
   var startTime = new Date();
   
-  if (checkRips())
-    updateList();
+  if (checkForNewRips())
+    addToList();
   
   var yesToNo = [];
   var noToYes = [];
-  var errorLog = [];
   var currentTotal = summarySheet.getRange("B1").getValue();
   var row = summarySheet.getRange("B5").getValue();
   var ready = true;
@@ -235,30 +161,12 @@ function updateArticleStatuses()
       row++;
     
     var originalTitle = uploadsSheet.getRange(row, 1).getValue();
-    var title = format(originalTitle);
-    var wikiUrl = "https://siivagunner.fandom.com/wiki/" + encodeURIComponent(title);
+    var encodedTitle = format(originalTitle);
+    var url = "https://siivagunner.fandom.com/wiki/" + encodedTitle;
     var oldStatus = uploadsSheet.getRange(row, 2).getValue();
     var id = uploadsSheet.getRange(row, 3).getValue();
     
-    // Check if the video has a wiki article.
-    try 
-    {
-      var response = UrlFetchApp.fetch(wikiUrl).getResponseCode();
-      
-      uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '", "' + originalTitle.replace(/"/g, '""') + '")');
-      uploadsSheet.getRange(row, 2).setValue("No");
-    } catch (e)
-    {
-      e = e.toString().replace(/\n\n/g, "\n");
-      Logger.log(e + "\n" + wikiUrl);
-      if (e.indexOf("404") != -1)
-      {
-        uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + wikiUrl + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
-        uploadsSheet.getRange(row, 2).setValue("Yes");
-      }
-      else if (e.indexOf("Address unavailable") == -1)
-        errorLog.push(e + "\n[" + wikiUrl + "]");
-    }
+    checkStatus(row, url, originalTitle, id, false);
     
     var newStatus = uploadsSheet.getRange(row, 2).getValue();
     
@@ -275,8 +183,8 @@ function updateArticleStatuses()
       catch (e)
       {
         e = e.toString().replace(/\n\n/g, "\n");
-        Logger.log(e + "\n" + wikiUrl);
-        errorLog.push(e + "\n[" + wikiUrl + "]");
+        Logger.log(e + "\n" + url);
+        errorLog.push(e + "\n[" + url + "]");
       }
     }
     else if (oldStatus != newStatus && newStatus == "Yes") // The rip needs an article
@@ -328,7 +236,8 @@ function updateArticleStatuses()
   }
 }
 
-function checkRips()
+// Check for recently uploaded rips.
+function checkForNewRips()
 {
   uploadsSheet.getRange("A2:P19000").sort({column: 4, ascending: false});
   var stop = false;
@@ -347,9 +256,8 @@ function checkRips()
     for (var j = 0; j < 50; j++)
     {
       var playlistItem = playlistResponse.items[j];
-      var title = playlistItem.snippet.title;
+      var originalTitle = playlistItem.snippet.title;
       var id = playlistItem.snippet.resourceId.videoId;
-      Logger.log("Video ID: \t" + id);
 
       stop = false;
       k = 0;
@@ -359,10 +267,9 @@ function checkRips()
           stop = true;
         else if (k == 99)
         {
-          Logger.log("Missing rip found.\t" + recentRipIds);
           stop = true;
           missingRip = true;
-          missingRipList.push(title);
+          missingRipList.push(originalTitle);
         }
         k++;
       }
@@ -375,14 +282,54 @@ function checkRips()
     return false;
 }
 
-// Make this work!
-function checkRipStatus()
+// Check if the rip has a wiki article.
+function checkStatus(row, url, originalTitle, id, newRip)
 {
+  try 
+  {
+    var response = UrlFetchApp.fetch(url).getResponseCode();
+    
+    uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + url + '", "' + originalTitle.replace(/"/g, '""') + '")');
+    uploadsSheet.getRange(row, 2).setValue("No");
+  } catch (e)
+  {
+    e = e.toString().replace(/\n\n/g, "\n");
+    Logger.log(e + "\n" + url);
+    if (e.indexOf("404") != -1)
+    {
+      uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + url + '?action=edit", "' + originalTitle.replace(/"/g, '""') +'")');
+      uploadsSheet.getRange(row, 2).setValue("Yes");
+
+      if (newRip)
+      {
+        Logger.log("Add: " + originalTitle);
+        YouTube.PlaylistItems.insert
+        ({
+          snippet: 
+          {
+            playlistId: "PLn8P5M1uNQk4_1_eaMchQE5rBpaa064ni",
+            resourceId: {kind: "youtube#video", videoId: id}
+          }
+        }, "snippet");
+      }
+    }
+    else
+    {
+      if (newRip)
+        uploadsSheet.getRange(row, 1).setFormula('=HYPERLINK("' + url + '", "' + originalTitle.replace(/"/g, '""') + '")');
+      
+      if (uploadsSheet.getRange(row, 2).getValue() == "")
+        uploadsSheet.getRange(row, 2).setValue("Unknown");
+      
+      if (e.indexOf("Address unavailable") == -1)
+        errorLog.push(e + "\n[" + url + "]")
+    }
+  }
 }
 
 function createTrigger()
 {
-  ScriptApp.newTrigger("updateArticleStatuses")
+  ScriptApp.newTrigger("updateList")
   .timeBased()
   .everyMinutes(30)
   .create();
@@ -393,28 +340,25 @@ function format(str)
   str = str.replace(/\[/g, '(');
   str = str.replace(/\]/g, ')');
   str = str.replace(/#/g, '');
-  //str = str.replace(/\​\|\​_/g, 'L'); //Fix this!
+  str = str.replace(/\​\|\​_/g, 'L');
+  str = encodeURIComponent(str);
+  str = str.replace(/%7C/g, '|');
   return str;
 }
 
-function test()
+function formatTester()
 {
-  var originalTitle = "$4cR1f1c14​|​_ - The Binding of Isaac";
-  var title = format(originalTitle);
-  Logger.log(title);
-  var url = "https://siivagunner.fandom.com/wiki/" + encodeURIComponent(title);
+  var originalTitle = "";
+  var encodedTitle = format(originalTitle);
+  var url = "https://siivagunner.fandom.com/wiki/" + encodedTitle;
   try 
   {
     var response = UrlFetchApp.fetch(url).getResponseCode();
-    
-    Logger.log("Success: response code " + response);
+    Logger.log("Success!");
   } catch (e)
   {
     e = e.toString().replace(/\n\n/g, "\n");
-    if (e.indexOf("404") != -1)
-        Logger.log("Error 404");
     Logger.log(e);
-    Logger.log("Failure: response code " + response);
   }
   Logger.log(url);
 }
