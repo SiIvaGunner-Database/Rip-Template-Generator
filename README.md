@@ -1,6 +1,6 @@
-# Rip Template Generator
+# Rip Template Generator (Deprecated)
 
-Generates the template for a rip article from a given video ID. This is a work in progress and will eventually be implemented into a future project.
+An HTML form that generates the template for a rip article based on the given video ID. This version is outdated; the current version can be found in the [SiIvaGunner Database](https://github.com/AAAAAAidan/SiIvaGunner-Database).
 
 ### External Links
 
