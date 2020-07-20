@@ -4,12 +4,10 @@ An HTML form that generates the template for a rip article based on the given vi
 
 ### External Links
 
+* [Google Sites Example](https://sites.google.com/view/rip-template-generator/home)
+
+* [Google Sites Classic Example](https://sites.google.com/site/siivagunnerdatabase/)
+
 * [Project Script](https://script.google.com/d/1FzUz8Mc6xwZMGaUf3QiVyxN3drtA_XqIMjkrJcRd4BEy8VNrsVNAwy8a/edit?usp=sharing)
-
-* [Project Spreadsheet](https://docs.google.com/spreadsheets/d/1Ay8mIwv99hBDSym0o_vol0tgRyUtRFH02fEEM79v_64/edit?usp=sharing)
-
-* [Project Website](https://sites.google.com/view/rip-template-generator/home)
-
-* [Alternate Project Website](https://sites.google.com/site/siivagunnerdatabase/)
 
 * [SiIvaGunner Wiki](https://siivagunner.fandom.com/wiki/SiIvaGunner_Wikia)
