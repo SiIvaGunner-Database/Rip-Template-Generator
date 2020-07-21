@@ -104,19 +104,19 @@ function buildTemplate(id)
       platform = "\n|platform= " + platformPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",");
     
     if (description.indexOf("Please read the channel description.") == -1 && description.indexOf("\n\n") != -1)
-    catchphrase = "\n|catchphrase= " + description.split("\n\n").pop();
+      catchphrase = "\n|catchphrase= " + description.split("\n\n").pop();
     
     // Format the video length, adding zeroes if needed.
     for (var i = 0; i < length.length; i++)
     {
       if (length.charAt(i) == "T" && length.charAt(i+2) == "S")
-      length = length.replace("PT", "0:0");
+        length = length.replace("PT", "0:0");
       else if (length.charAt(i) == "T" && length.charAt(i+3) == "S")
-      length = length.replace("PT", "0:");
+        length = length.replace("PT", "0:");
       else if (length.charAt(i) == "M" && length.charAt(i+2) == "S")
-      length = length.replace("M", ":0");
+        length = length.replace("M", ":0");
       if (length.charAt(i) == "H" && length.charAt(i+2) == "M")
-      length = length.replace("H", ":0");
+        length = length.replace("H", ":0");
     }
     
     length = length.replace("PT", "").replace("H", ":").replace("M", ":").replace("S", "");
@@ -181,7 +181,7 @@ function buildTemplate(id)
     return e;
   }
   return [val, imageEmbed];
-} 
+}
 
 function doGet()
 {
