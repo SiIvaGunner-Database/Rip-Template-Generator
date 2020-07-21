@@ -3,8 +3,6 @@ function buildTemplate(id)
 {
   var description = "";
   var videoId = JSON.stringify(id).replace("{\"\":\"", "").replace("\"}", "").replace("&feature=youtu.be", "").replace(/&.*/, "").replace(/h.*=/, "");
-  //var videoId = "P-NswzsNhro";
-  //videoId = videoId.replace(/h.*=/, "");
   
   if (videoId.length != 11)
     return "Invalid video ID: " + videoId;
@@ -71,13 +69,13 @@ function buildTemplate(id)
       description = description.replace("Composed by: ", "Composer: ");
       composerLabel = "\n|composer label= Composed by";
     }
-
+    
     if (description.indexOf("Platforms: ") != -1)
     {
       description = description.replace("Platforms: ", "Platform: ");
       platformLabel = "\n|platform label= Platforms";
     }
-
+    
     // Use regular expressions to get the necessary information from the description.
     var playlistIdPattern = new RegExp("Playlist: (.*)\n");
     var composerPattern = new RegExp("Composer: (.*)\n");
@@ -90,7 +88,7 @@ function buildTemplate(id)
       var ripperPattern = new RegExp("Ripper: (.*)");
       catchphrase = "\n|catchphrase= ";
     }
-
+    
     description = description.replace(/,/g, "COMMA");
     
     if (description.indexOf("Playlist: ") != -1)
@@ -106,25 +104,25 @@ function buildTemplate(id)
       platform = "\n|platform= " + platformPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",");
     
     if (description.indexOf("Please read the channel description.") == -1 && description.indexOf("\n\n") != -1)
-      catchphrase = "\n|catchphrase= " + description.split("\n\n").pop();
+    catchphrase = "\n|catchphrase= " + description.split("\n\n").pop();
     
     // Format the video length, adding zeroes if needed.
     for (var i = 0; i < length.length; i++)
     {
       if (length.charAt(i) == "T" && length.charAt(i+2) == "S")
-        length = length.replace("PT", "0:0");
+      length = length.replace("PT", "0:0");
       else if (length.charAt(i) == "T" && length.charAt(i+3) == "S")
-        length = length.replace("PT", "0:");
+      length = length.replace("PT", "0:");
       else if (length.charAt(i) == "M" && length.charAt(i+2) == "S")
-        length = length.replace("M", ":0");
+      length = length.replace("M", ":0");
       if (length.charAt(i) == "H" && length.charAt(i+2) == "M")
-        length = length.replace("H", ":0");
+      length = length.replace("H", ":0");
     }
-
+    
     length = length.replace("PT", "").replace("H", ":").replace("M", ":").replace("S", "");
     
     // Format the upload date.
-    uploadDate = Utilities.formatDate(new Date(uploadDate), "GMT-5", "MMMM d, yyyy");
+    uploadDate = Utilities.formatDate(new Date(uploadDate), "UTC", "MMMM d, yyyy");
     
     // Seperate the rip title into four parts: full title, song title, game title, and mix.
     pageName = pageName.split(" - ");
@@ -145,8 +143,7 @@ function buildTemplate(id)
       track = track.replace(/,/g, "COMMA");
       simplifiedTrack = simplifiedTrackPattern.exec(track).toString().split(",").pop().replace(/COMMA/g, ",");
       simplifiedTrack = simplifiedTrack.replace(/COMMA/g, ",");
-      track = track.replace(/COMMA/g, ",");      
-      
+      track = track.replace(/COMMA/g, ",");
       mix = track.replace(simplifiedTrack + " ", "").replace(/\(/g, "of the ").replace(/\)/g, " ").replace(/Mix/g, "mix").replace(/Version/g, "version");
     }
     
@@ -171,18 +168,18 @@ function buildTemplate(id)
               /* "\n|platform label= " + */ platformLabel +
               /* "\n|catchphrase= " + */ catchphrase +
               "\n}}" +
-              "\n\"\'\'\'" + pageName + "\'\'\'\" is a high quality rip " + mix +
+              "\n\"\'\'\'" + pageName + "\'\'\'\" is a high quality rip " + mix
               "of \"" + simplifiedTrack + "\" from \'\'" + game + "\'\'." +
-              "\n== Jokes ==";
+               "\n== Jokes ==";
     
     Logger.log(val);
-  } catch(e)
+  }
+  catch(e)
   {
     range.setValue(e); 
     Logger.log(e);
     return e;
   }
-
   return [val, imageEmbed];
 } 
 
