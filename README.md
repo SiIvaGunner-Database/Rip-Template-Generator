@@ -8,6 +8,4 @@ An HTML form that generates the template for a rip article based on the given vi
 
 * [Google Sites Classic Example](https://sites.google.com/site/siivagunnerdatabase/)
 
-* [Project Script](https://script.google.com/d/1FzUz8Mc6xwZMGaUf3QiVyxN3drtA_XqIMjkrJcRd4BEy8VNrsVNAwy8a/edit?usp=sharing)
-
-* [SiIvaGunner Wiki](https://siivagunner.fandom.com/wiki/SiIvaGunner_Wikia)
+* [SiIvaGunner Wiki](https://siivagunner.fandom.com/wiki/SiIvaGunner_Wiki)
