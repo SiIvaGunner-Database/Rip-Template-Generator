@@ -168,7 +168,7 @@ function buildTemplate(id)
               /* "\n|platform label= " + */ platformLabel +
               /* "\n|catchphrase= " + */ catchphrase +
               "\n}}" +
-              "\n\"\'\'\'" + pageName + "\'\'\'\" is a high quality rip " + mix
+              "\n\"\'\'\'" + pageName + "\'\'\'\" is a high quality rip " + mix +
               "of \"" + simplifiedTrack + "\" from \'\'" + game + "\'\'." +
                "\n== Jokes ==";
     
