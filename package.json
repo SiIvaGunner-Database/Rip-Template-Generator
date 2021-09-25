@@ -1,0 +1,20 @@
+{
+  "name": "rip-template-generator",
+  "version": "1.1.0",
+  "description": "An HTML form that generates the template for a rip article based on the given video ID.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AAAAAAidan/Rip-Template-Generator.git"
+  },
+  "author": "Aidan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AAAAAAidan/Rip-Template-Generator/issues"
+  },
+  "homepage": "https://github.com/AAAAAAidan/Rip-Template-Generator#readme",
+  "dependencies": {}
+}
