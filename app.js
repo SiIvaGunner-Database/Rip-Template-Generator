@@ -1,6 +1,7 @@
 const http = require("http");
 const fs = require("fs");
-const server = http.createServer((request, response) => {
+
+http.createServer((request, response) => {
   response.statusCode = 200;
   response.setHeader("Content-Type", "text/html");
   fs.readFile("./views/index.html", (error, data) => {
