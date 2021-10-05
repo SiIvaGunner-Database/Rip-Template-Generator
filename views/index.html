@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" href="https://storage.googleapis.com/siivagunner-database-media/siivagunnerdb/style.css" />
     <style>
 
-body {
-  background-color: white;
+html, body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+main {
+  padding: 16px;
 }
 
 #thumbnail img {
@@ -15,10 +23,6 @@ body {
 #template {
   border: none;
   background-color: inherit;
-  width: 100%;
-}
-
-.wikiText {
   tab-size: 4;
 }
 
@@ -364,18 +368,19 @@ function requestUrl(url) {
     </script>
   </head>
   <body>
-    <form onsubmit="return generateTemplate()">
-      <input type="text" id="inputText" placeholder="Enter URL or ID"/>
-      <button id="submitBtn">Submit</button>
-      <button type="button" onclick="copyTemplate()">Copy</button>
-      <select id="format">
-        <option value="single">One-sided spacing</option>
-        <option value="double">Double-sided spacing</option>
-        <option value="tab">Tabbed spacing</option>
-        <option value="none">No spacing</option>
-      </select>
-    </form>
-    <textarea class="wikiText" readonly id="template" rows="21">
+    <main>
+      <form onsubmit="return generateTemplate()">
+        <input type="text" id="inputText" placeholder="Enter URL or ID"/>
+        <button id="submitBtn">Submit</button>
+        <button type="button" onclick="copyTemplate()">Copy</button>
+        <select id="format">
+          <option value="single">One-sided spacing</option>
+          <option value="double">Double-sided spacing</option>
+          <option value="tab">Tabbed spacing</option>
+          <option value="none">No spacing</option>
+        </select>
+      </form>
+      <textarea readonly id="template" rows="21">
 {{Rip
 |image= Fire Emblem.jpg
 
@@ -396,11 +401,12 @@ function requestUrl(url) {
 }}
 "'''The Inn - Fire Emblem'''" is a high quality rip of "The Inn" from ''Fire Emblem''.
 == Jokes ==
-    </textarea>
-    <div id="thumbnail">
-      <a target="_blank" href="https://img.youtube.com/vi/NzoneDE0A2o/maxresdefault.jpg">
-        <img src="https://img.youtube.com/vi/NzoneDE0A2o/maxresdefault.jpg" alt="Thumbnail">
-      </a>
-    </div>
+      </textarea>
+      <div id="thumbnail">
+        <a target="_blank" href="https://img.youtube.com/vi/NzoneDE0A2o/maxresdefault.jpg">
+          <img src="https://img.youtube.com/vi/NzoneDE0A2o/maxresdefault.jpg" alt="Thumbnail">
+        </a>
+      </div>
+    </main>
   </body>
 </html>
