@@ -366,8 +366,8 @@ function requestUrl(url) {
   <body>
     <form onsubmit="return generateTemplate()">
       <input type="text" id="inputText" placeholder="Enter URL or ID"/>
-      <button id="submitBtn" onclick="generateTemplate()">Submit</button>
-      <button onclick="copyTemplate()">Copy</button>
+      <button id="submitBtn">Submit</button>
+      <button type="button" onclick="copyTemplate()">Copy</button>
       <select id="format">
         <option value="single">One-sided spacing</option>
         <option value="double">Double-sided spacing</option>
