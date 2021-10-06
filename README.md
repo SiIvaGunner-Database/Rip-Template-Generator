@@ -1,10 +1,28 @@
 # Rip Template Generator
 
-An HTML form that generates the template for a rip article based on the given video ID. This project can also be found in the [SiIvaGunner Database](https://github.com/SiIvaGunner-Database/SiIvaGunner-Database).
+An embeddable HTML form that generates the template for a rip article based on the given video URL or ID.
+
+### HTML Embedding
+
+This application can be embedded into web pages using the iframe element.
+
+```
+<iframe id="templateGenerator"
+  title="Rip Template Generator"
+  style="height: 100%; width: 100%; border: none;"
+  src="https://rip-template-generator-x2snfuxbeq-uc.a.run.app/">
+</iframe>
+```
+
+### Local Development
+
+Requires [Node.js](https://nodejs.org/en/download/) and [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm). No dependency installation required. Use the following command to start the server:
+
+```
+npm start
+```
 
 ### External Links
-
-* [Embeddable Web App](https://script.google.com/macros/s/AKfycbzx3NppskGGzqz52NkxT78VPEflWSXytOkh3XCjng/exec)
 
 * [Google Sites Example](https://sites.google.com/view/rip-template-generator/home)
 
