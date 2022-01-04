@@ -204,8 +204,8 @@ function generateTemplate() {
           if (description.includes("Platform: "))
             platform = "\n|platform\t= " + platformPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",");
 
-          if (!description.includes("Please read the channel description.") && description.match(/(\n\n|═\n)/))
-            catchphrase = "\n|catchphrase\t= " + description.split(/(\n\n|═\n)/).pop().replace(/COMMA/g, ",");
+          if (!description.includes("Please read the channel description.") && description.match(/(\n\n|\u2550\n)/))
+            catchphrase = "\n|catchphrase\t= " + description.split(/(\n\n|\u2550\n)/).pop().replace(/COMMA/g, ",");
 
           for (var i = 0; i < length.length; i++) {
             if (length.charAt(i) == "T" && length.charAt(i + 2) == "S")
