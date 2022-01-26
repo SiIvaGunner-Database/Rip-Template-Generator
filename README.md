@@ -10,7 +10,7 @@ This application can be embedded into web pages using the iframe element.
 <iframe id="templateGenerator"
   title="Rip Template Generator"
   style="height: 100%; width: 100%; border: none;"
-  src="https://rip-template-generator-x2snfuxbeq-uc.a.run.app/">
+  src="https://siivagunner-database.github.io/Rip-Template-Generator/">
 </iframe>
 ```
 
