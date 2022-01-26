@@ -14,14 +14,6 @@ This application can be embedded into web pages using the iframe element.
 </iframe>
 ```
 
-### Local Development
-
-Requires [Node.js](https://nodejs.org/en/download/) and [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm). No dependency installation required. Use the following command to start the server:
-
-```
-npm start
-```
-
 ### External Links
 
 * [Google Sites Example](https://sites.google.com/view/rip-template-generator/home)
