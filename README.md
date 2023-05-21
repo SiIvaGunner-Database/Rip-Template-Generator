@@ -4,7 +4,7 @@ An embeddable HTML form that generates the template for a rip article based on t
 
 ### HTML Embedding
 
-This application can be embedded into web pages using the iframe element.
+The application can be embedded into web pages using the iframe element. However, the YouTube API key will only work on whitelisted domains. If you'd like to add a site to the whitelist, reach out to me (Aidan) and I can get it added.
 
 ```
 <iframe id="templateGenerator"
@@ -17,7 +17,5 @@ This application can be embedded into web pages using the iframe element.
 ### External Links
 
 * [Google Sites Example](https://sites.google.com/view/rip-template-generator/home)
-
-* [Google Sites Classic Example](https://sites.google.com/site/siivagunnerdatabase/)
 
 * [SiIvaGunner Wiki](https://siivagunner.fandom.com/wiki/SiIvaGunner_Wiki)
