@@ -309,8 +309,15 @@ function generateTemplate() {
             template = template.replace(/\t\t= |\t= /g, "=");
 
           var lineCount = template.split(/\n/).length + 1;
-          var thumbnailLink = "https://img.youtube.com/vi/" + id + "/maxresdefault.jpg";
-          var thumbnailElement = "<a target=\"_blank\" href=\"" + thumbnailLink + "\"><img src=\"" + thumbnailLink + "\" alt=\"Thumbnail\"></a>";
+          var thumbnails = [
+            videoJSON.snippet.thumbnails.maxres,
+            videoJSON.snippet.thumbnails.standard,
+            videoJSON.snippet.thumbnails.high,
+            videoJSON.snippet.thumbnails.medium,
+            videoJSON.snippet.thumbnails.default
+          ];
+          var thumbnailUrl = thumbnails.find(thumbnail => thumbnail !== undefined).url;
+          var thumbnailElement = `<a target="_blank" href="${thumbnailUrl}"><img src="${thumbnailUrl}" alt="The thumbnail of the given rip shown on YouTube"></a>`;
 
           document.getElementById("template").rows = lineCount;
           document.getElementById("template").innerHTML = template;
