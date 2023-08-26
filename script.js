@@ -158,19 +158,19 @@ function generateTemplate() {
 
           description = description.replace(/,/g, "COMMA");
 
-          if (description.includes("Playlist: "))
+          if (playlistIdPattern.test(description) === true)
             playlistId = playlistIdPattern.exec(description).toString().split(",").pop();
 
-          if (description.includes("Ripper: "))
+          if (ripperPattern.test(description) === true)
             ripper = ripperPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",");
 
-          if (description.includes("Developed by: "))
+          if (developerPattern.test(description) === true)
             developer = developerPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",");
 
-          if (description.includes("Composer: "))
+          if (composerPattern.test(description) === true)
             composer = "\n|composer\t= " + composerPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",");
 
-          if (description.includes("Platform: "))
+          if (platformPattern.test(description) === true)
             platform = "\n|platform\t= " + platformPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",");
 
           if (!description.includes("Please read the channel description.") && description.match(/(\n\n|\u2550\n)/))
