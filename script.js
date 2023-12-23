@@ -16,13 +16,13 @@ function checkFormattingSelection() {
     switch(currentFormattingSelection) {
       case "none":
         template = template.replace(/\t\t\t= |\t\t= |\t= | = |= /g, "=")
-        break;
+        break
       case "single":
         template = template.replace(/\t\t\t= |\t\t= |\t= | = |=/g, "= ")
-        break;
+        break
       case "double":
         template = template.replace(/\t\t\t= |\t\t= |\t= |= |=/g, " = ")
-        break;
+        break
       case "tab":
         template = template.replace(/ = |= |=/g, "\t\t\t= ")
           .replace("playlist\t\t", "playlist\t")
@@ -32,7 +32,7 @@ function checkFormattingSelection() {
           .replace("platform\t\t", "platform\t")
           .replace("platform label\t\t\t", "platform label\t")
           .replace("catchphrase\t\t\t", "catchphrase\t")
-        break;
+        break
     }
 
     template = template.replace("JOKEHEADER", "== Jokes ==")
@@ -83,7 +83,7 @@ async function updateTemplate() {
       setTemplate(`Invalid video URL or ID: "${input}"`)
     } else {
       const videoListJson = await fetchVideoJson(id)
-      console.log(videoListJson);
+      console.log(videoListJson)
 
       if (videoListJson.items.length === 0) {
         setTemplate(`No video found with the ID "${id}"`)
@@ -254,6 +254,7 @@ async function generateTemplate(videoJson) {
 
   // Search for ripper
   if (ripperPattern.test(description) === true) {
+    console.log(ripperPattern.exec(description))
     ripper = ripperPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",")
   }
 
@@ -325,7 +326,7 @@ async function generateTemplate(videoJson) {
 
   // Parse the mix and save a copy of the track without the mix included
   if (track.includes(mixSeperatorChar) && (track.includes("Mix") || track.includes("Version"))) {
-    var trackSections = track.split(mixSeperatorChar)
+    const trackSections = track.split(mixSeperatorChar)
     mix = "of the " + trackSections.pop().replace(/\)/g, "").replace(/Mix/g, "mix").replace(/Version/g, "version").trim() + " "
     simplifiedTrack = trackSections.join(mixSeperatorChar).trim()
   }
