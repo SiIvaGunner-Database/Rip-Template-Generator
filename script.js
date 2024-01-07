@@ -77,7 +77,10 @@ async function updateTemplate() {
   if (input.length === 0) {
     setTemplate(`Please enter a video URL or ID. For example: "NzoneDE0A2o"`)
   } else {
-    const id = input.replace(/&.*/g, "").replace(/.*[=\/]/g, "")
+    // 1. Remove the URL's protocol and domain ("https://www.youtube.com/", "https://youtu.be/", etc.)
+    // 2. Remove everything before the video ID parameter (e.g. "?v=[video id]")
+    // 3. Remove any remaining parameters (e.g. "?param1=value1&param2=value2")
+    const id = input.replace(/.*\//g, "").replace(/.*v=/g, "").replace(/[?&].*/g, "").trim()
 
     if (id.length !== 11) {
       setTemplate(`Invalid video URL or ID: "${input}"`)
