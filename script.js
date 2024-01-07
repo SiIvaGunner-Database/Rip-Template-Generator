@@ -284,7 +284,6 @@ async function generateTemplate(videoJson) {
 
   let game = ""
   let track = ""
-  let simplifiedTrack = ""
   let mix = ""
 
   // Characters used to separate the track from the game and the mix
@@ -322,7 +321,8 @@ async function generateTemplate(videoJson) {
     game = game.replace(/ Music$/, "")
   }
 
-  simplifiedTrack = track
+  let image = game.replace(/:/, "-")
+  let simplifiedTrack = track
 
   // Parse the mix and save a copy of the track without the mix included
   if (track.includes(mixSeperatorChar) && (track.includes("Mix") || track.includes("Version"))) {
@@ -344,7 +344,7 @@ async function generateTemplate(videoJson) {
   }
 
   template += "{{Rip" +
-              "\n|image\t\t= " + game + ".jpg" +
+              "\n|image\t\t= " + image + ".jpg" +
               "\n" +
               "\n|link\t\t= " + videoId
 
