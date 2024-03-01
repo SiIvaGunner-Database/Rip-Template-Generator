@@ -1,0 +1,22 @@
+{
+  "name": "rip-template-generator",
+  "version": "1.0.0",
+  "description": "Embeddable HTML form and web API for generating wiki article templates.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SiIvaGunner-Database/Rip-Template-Generator.git"
+  },
+  "author": "Aidan",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/SiIvaGunner-Database/Rip-Template-Generator/issues"
+  },
+  "homepage": "https://github.com/SiIvaGunner-Database/Rip-Template-Generator#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
