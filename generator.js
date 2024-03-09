@@ -3,7 +3,7 @@
  * @param {Object} req - The Express request object.
  * @param {Object} res - The Express response object.
  */
-function indexJsonResponse() {
+function indexJsonResponse(req, res) {
   res.json({
     "rip": "/api/rip"
   })

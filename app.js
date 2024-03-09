@@ -9,8 +9,8 @@ app.use((req, res, next) => {
   next()
 })
 app.use(express.static("static"))
-app.use("/api/rip", (req, res) => generator.ripJsonResponse(req, res))
-app.use("/api", (req, res) => generator.indexJsonResponse(req, res))
+app.use("/api/rip", generator.ripJsonResponse)
+app.use("/api", generator.indexJsonResponse)
 
 const startupTime = new Date().getTime() - startTime
 console.log(`Startup completed in ${startupTime} milliseconds`)
