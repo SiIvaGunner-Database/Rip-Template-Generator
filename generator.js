@@ -1,25 +1,26 @@
 /**
- * Get an API index JSON response.
- * @return {Object} The JSON response.
+ * Generate an API index JSON response.
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
  */
- function getIndexJson() {
-  return {
+function indexJsonResponse() {
+  res.json({
     "rip": "/api/rip"
-  }
+  })
 }
 
 /**
- * Get an API rip template JSON response for wiki articles.
+ * Generate an API rip template JSON response for wiki articles.
  * Returns an error message if the ID is invalid.
  * @param {Object} req - The Express request object.
- * @return {Object} The JSON response.
+ * @param {Object} res - The Express response object.
  */
-async function getRipJson(req) {
+async function ripJsonResponse(req, res) {
   const id = req.query.id
-  const format = req.query.format
+  const spacing = req.query.spacing
 
   if (id === undefined || id.length === 0) {
-    return errorResponse(`Please provide a video URL or ID. For example: "/api/rip?id=NzoneDE0A2o"`)
+    res.json(errorResponse(`Please provide a video ID. For example: '/api/rip?id=NzoneDE0A2o'`))
   } else {
     // 1. Remove the URL's protocol and domain ("https://www.youtube.com/", "https://youtu.be/", etc.)
     // 2. Remove everything before the video ID parameter (e.g. "?v=[video id]")
@@ -27,15 +28,14 @@ async function getRipJson(req) {
     const cleanId = id.replace(/.*\//g, "").replace(/.*v=/g, "").replace(/[?&].*/g, "").trim()
 
     if (cleanId.length !== 11) {
-      return errorResponse(`Invalid video URL or ID: "${cleanId}"`)
+      res.json(errorResponse(`Invalid video URL or ID: '${cleanId}'`))
     } else {
       const videoListJson = await fetchVideoJson(cleanId)
-      console.log(videoListJson)
 
       if (videoListJson.items.length === 0) {
-        return setTemplate(`No video found with the ID "${cleanId}"`)
+        res.json(errorResponse(`No video found with the ID '${cleanId}'`))
       } else {
-        return templateResponse(videoListJson.items[0], format)
+        res.json(templateResponse(videoListJson.items[0], spacing))
       }
     }
   }
@@ -70,6 +70,7 @@ async function fetchVideoJson(id) {
       url += "&" + key + "=" + value
     })
 
+    console.log("FETCH", url)
     const response = await fetch(url)
     return await response.json()
 }
@@ -83,10 +84,10 @@ async function fetchVideoJson(id) {
  * Step 5. Build the rip template string.
  * Step 6. Insert the template and thumbnail into the page.
  * @param {Object} videoJson - The video metadata JSON object.
- * @param {String} format - The template spacing format.
+ * @param {String} spacing - The template spacing style.
  * @return {Object} The JSON response.
  */
-async function templateResponse(videoJson, format) {
+function templateResponse(videoJson, spacing) {
   const siivaId = "UC9ecwl3FTG66jIKA9JRDtmg"
   const ttgdId = "UCIXM2qZRG9o4AFmEsKZUIvQ"
   const mysiktId = "UCnv4xkWtbqAKMj8TItM6kOA"
@@ -203,7 +204,6 @@ async function templateResponse(videoJson, format) {
 
   // Search for ripper
   if (ripperPattern.test(description) === true) {
-    console.log(ripperPattern.exec(description))
     ripper = ripperPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",")
   }
 
@@ -350,12 +350,21 @@ async function templateResponse(videoJson, format) {
   // Step 6. Insert the template and thumbnail into the page. //
   //////////////////////////////////////////////////////////////
 
-  if (format === "single") {
-    template = template.replace(/\t\t= |\t= /g, "= ")
-  } else if (format === "double") {
-    template = template.replace(/\t\t= |\t= /g, " = ")
-  } else if (format === "none") {
-    template = template.replace(/\t\t= |\t= /g, "=")
+  switch (spacing) {
+    case "tab":
+      // Tabs are used in the initial generation, so no action is needed
+      break
+    case "none":
+      template = template.replace(/\t\t= |\t= /g, "=")
+      break
+    case "double":
+      template = template.replace(/\t\t= |\t= /g, " = ")
+      break
+    case "single":
+    default:
+      // Default to single spaces
+      template = template.replace(/\t\t= |\t= /g, "= ")
+      break
   }
 
   return {
@@ -365,6 +374,6 @@ async function templateResponse(videoJson, format) {
 }
 
 module.exports = {
-  getIndexJson,
-  getRipJson
+  indexJsonResponse,
+  ripJsonResponse
 }
