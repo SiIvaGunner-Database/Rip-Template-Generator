@@ -4,7 +4,7 @@
   "description": "Embeddable HTML form and web API for generating wiki article templates.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app"
   },
   "repository": {
     "type": "git",
