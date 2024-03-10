@@ -9,12 +9,12 @@ main {
   padding: 16px;
 }
 
-#thumbnail img {
+#thumbnailDiv img {
   height: 180px;
   width: 320px;
 }
 
-#template {
+#templateArea {
   border: none;
   background-color: inherit;
   tab-size: 4;
