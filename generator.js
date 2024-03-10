@@ -1,5 +1,5 @@
 /**
- * Generate an API index JSON response.
+ * Generate an index JSON response.
  * @param {Object} req - The Express request object.
  * @param {Object} res - The Express response object.
  */
@@ -10,8 +10,7 @@ function indexJsonResponse(req, res) {
 }
 
 /**
- * Generate an API rip template JSON response for wiki articles.
- * Returns an error message if the ID is invalid.
+ * Generate a rip template JSON response with any error messages included.
  * @param {Object} req - The Express request object.
  * @param {Object} res - The Express response object.
  */
@@ -20,7 +19,7 @@ async function ripJsonResponse(req, res) {
   const spacing = req.query.spacing
 
   if (id === undefined || id.length === 0) {
-    res.json(errorResponse(`Please provide a video ID. For example: '/api/rip?id=NzoneDE0A2o'`))
+    res.json(errorResponse(`Please enter a video URL or ID. For example: "NzoneDE0A2o"`))
   } else {
     // 1. Remove the URL's protocol and domain ("https://www.youtube.com/", "https://youtu.be/", etc.)
     // 2. Remove everything before the video ID parameter (e.g. "?v=[video id]")
@@ -28,12 +27,12 @@ async function ripJsonResponse(req, res) {
     const cleanId = id.replace(/.*\//g, "").replace(/.*v=/g, "").replace(/[?&].*/g, "").trim()
 
     if (cleanId.length !== 11) {
-      res.json(errorResponse(`Invalid video URL or ID: '${cleanId}'`))
+      res.json(errorResponse(`Invalid video URL or ID: "${id}"`))
     } else {
       const videoListJson = await fetchVideoJson(cleanId)
 
       if (videoListJson.items.length === 0) {
-        res.json(errorResponse(`No video found with the ID '${cleanId}'`))
+        res.json(errorResponse(`No video found with the ID "${cleanId}"`))
       } else {
         res.json(templateResponse(videoListJson.items[0], spacing))
       }
@@ -42,8 +41,8 @@ async function ripJsonResponse(req, res) {
 }
 
 /**
- * Get an API failure JSON response.
- * @param {String} id - A message to include in the response.
+ * Generate a failure JSON response.
+ * @param {String} id - The message to include in the response.
  * @return {Object} The JSON response.
  */
 function errorResponse(message) {
@@ -76,14 +75,14 @@ async function fetchVideoJson(id) {
 }
 
 /**
- * Generate a template in six primary steps:
+ * Generate a template JSON response in six primary steps:
  * Step 1. Format the upload date and length.
  * Step 2. Search and replace uncommon labels that might be in the description.
  * Step 3. Search for common template values: composer, playlist, platform, etc.
  * Step 4. Separate the full title, track title, game title, and mix.
  * Step 5. Build the rip template string.
- * Step 6. Insert the template and thumbnail into the page.
- * @param {Object} videoJson - The video metadata JSON object.
+ * Step 6. Insert the template and thumbnail into the JSON response.
+ * @param {Object} videoJson - The video's JSON metadata.
  * @param {String} spacing - The template spacing style.
  * @return {Object} The JSON response.
  */
@@ -126,7 +125,7 @@ function templateResponse(videoJson, spacing) {
   length = length.replace("PT", "").replace("H", ":").replace("M", ":").replace("S", "")
 
   // Format the upload date in the style "MMMM d, yyyy"
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
   uploadDate = new Date(uploadDate)
   uploadDate = `${months[uploadDate.getUTCMonth()]} ${uploadDate.getUTCDate()}, ${uploadDate.getUTCFullYear()}`
 
@@ -346,9 +345,9 @@ function templateResponse(videoJson, spacing) {
                 "\n== Jokes =="
   }
 
-  //////////////////////////////////////////////////////////////
-  // Step 6. Insert the template and thumbnail into the page. //
-  //////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////
+  // Step 6. Insert the template and thumbnail into the JSON response. //
+  ///////////////////////////////////////////////////////////////////////
 
   switch (spacing) {
     case "tab":
@@ -367,9 +366,20 @@ function templateResponse(videoJson, spacing) {
       break
   }
 
+  // Manually create the array to ensure the highest quality thumbnails are listed first
+  const thumbnails = [
+    videoJson.snippet.thumbnails.maxres,
+    videoJson.snippet.thumbnails.standard,
+    videoJson.snippet.thumbnails.high,
+    videoJson.snippet.thumbnails.medium,
+    videoJson.snippet.thumbnails.default
+  ]
+  const thumbnail = thumbnails.find(thumbnail => thumbnail !== undefined).url
+
   return {
     "status": "success",
-    "template": template
+    "template": template,
+    "thumbnail": thumbnail
   }
 }
 
