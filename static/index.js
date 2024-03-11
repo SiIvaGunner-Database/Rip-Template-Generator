@@ -63,8 +63,14 @@ function copyTemplate() {
 async function submitTemplateGenerator(event) {
   event.preventDefault()
   const idInput = document.getElementById("idInput").value.trim()
-  await fetch(`api/rip?id=${idInput}&spacing=${spacingSelection}`)
-    .then(response => response.json())
+  const options = {
+    "id": idInput,
+    "spacing": spacingSelection
+  }
+  // TODO determine whether or not the current use of generator.js is a bad idea
+  // await fetch(`api/rip?id=${idInput}&spacing=${spacingSelection}`)
+  //   .then(response => response.json())
+  await ripJsonResponse(options)
     .then(json => {
       if (json.message !== undefined) {
         setTemplate(json.message)

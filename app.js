@@ -1,7 +1,7 @@
 const startTime = new Date().getTime()
 const cors = require('cors')
 const express = require("express")
-const generator = require('./generator')
+const generator = require('./static/generator')
 
 const app = express()
 app.listen(3000)
@@ -11,8 +11,8 @@ app.use((req, res, next) => {
 })
 app.use(cors())
 app.use(express.static("static"))
-app.use("/api/rip", generator.ripJsonResponse)
-app.use("/api", generator.indexJsonResponse)
+app.use("/api/rip", async (req, res) => res.json(await generator.ripJsonResponse(req.query)))
+app.use("/api", (req, res) => res.json(generator.indexJsonResponse()))
 
 const startupTime = new Date().getTime() - startTime
 console.log(`Startup completed in ${startupTime} milliseconds`)

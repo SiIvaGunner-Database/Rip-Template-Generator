@@ -1,40 +1,36 @@
 /**
  * Generate an index JSON response.
- * @param {Object} req - The Express request object.
- * @param {Object} res - The Express response object.
+ * @return {Object} The JSON response.
  */
-function indexJsonResponse(req, res) {
-  res.json({
+function indexJsonResponse() {
+  return {
     "rip": "/api/rip"
-  })
+  }
 }
 
 /**
  * Generate a rip template JSON response with any error messages included.
- * @param {Object} req - The Express request object.
- * @param {Object} res - The Express response object.
+ * @param {Object} options - A parameter object: { id: String; [spacing]: String; }
+ * @return {Object} The JSON response.
  */
-async function ripJsonResponse(req, res) {
-  const id = req.query.id
-  const spacing = req.query.spacing
-
-  if (id === undefined || id.length === 0) {
-    res.json(errorResponse(`Please enter a video URL or ID. For example: "NzoneDE0A2o"`))
+async function ripJsonResponse(options) {
+  if (options.id === undefined || options.id.length === 0) {
+    return errorResponse(`Please enter a video URL or ID. For example: "NzoneDE0A2o"`)
   } else {
     // 1. Remove the URL's protocol and domain ("https://www.youtube.com/", "https://youtu.be/", etc.)
     // 2. Remove everything before the video ID parameter (e.g. "?v=[video id]")
     // 3. Remove any remaining parameters (e.g. "?param1=value1&param2=value2")
-    const cleanId = id.replace(/.*\//g, "").replace(/.*v=/g, "").replace(/[?&].*/g, "").trim()
+    const cleanId = options.id.replace(/.*\//g, "").replace(/.*v=/g, "").replace(/[?&].*/g, "").trim()
 
     if (cleanId.length !== 11) {
-      res.json(errorResponse(`Invalid video URL or ID: "${id}"`))
+      return errorResponse(`Invalid video URL or ID: "${options.id}"`)
     } else {
       const videoListJson = await fetchVideoJson(cleanId)
 
       if (videoListJson.items.length === 0) {
-        res.json(errorResponse(`No video found with the ID "${cleanId}"`))
+        return errorResponse(`No video found with the ID "${cleanId}"`)
       } else {
-        res.json(templateResponse(videoListJson.items[0], spacing))
+        return templateResponse(videoListJson.items[0], options.spacing)
       }
     }
   }
@@ -383,7 +379,13 @@ function templateResponse(videoJson, spacing) {
   }
 }
 
-module.exports = {
-  indexJsonResponse,
-  ripJsonResponse
+// generator.js is currently in use on both the back and front end, and a
+// try-catch statement is used here to avoid hard errors on the front end.
+try {
+  module.exports = {
+    indexJsonResponse,
+    ripJsonResponse
+  }
+} catch (error) {
+  console.warn("Silencing module.exports error\n", error)
 }
