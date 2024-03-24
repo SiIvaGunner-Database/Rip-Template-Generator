@@ -1,3 +1,5 @@
+"use strict"
+
 /**
  * Generate a few templates and insert the results into the template textarea.
  */

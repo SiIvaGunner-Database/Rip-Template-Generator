@@ -1,3 +1,5 @@
+"use strict"
+
 /**
  * Generate an index JSON response.
  * @return {Object} The JSON response.
@@ -25,9 +27,11 @@ async function ripJsonResponse(options) {
     if (cleanId.length !== 11) {
       return errorResponse(`Invalid video URL or ID: "${options.id}"`)
     } else {
-      const videoListJson = await fetchVideoJson(cleanId)
+      const videoListJson = await fetchVideoJson(cleanId, options.key)
 
-      if (videoListJson.items.length === 0) {
+      if (videoListJson.error !== undefined) {
+        return errorResponse(videoListJson.error.message)
+      } else if (videoListJson.items.length === 0) {
         return errorResponse(`No video found with the ID "${cleanId}"`)
       } else {
         return templateResponse(videoListJson.items[0], options.spacing)
@@ -42,6 +46,7 @@ async function ripJsonResponse(options) {
  * @return {Object} The JSON response.
  */
 function errorResponse(message) {
+  console.log(new Date(), "INFO", message)
   return {
     "status": "failure",
     "message": message
@@ -51,21 +56,13 @@ function errorResponse(message) {
 /**
  * Fetch video metadata from the YouTube API.
  * @param {String} id - The video ID.
+ * @param {String} [key] - An optional API key to use in place of the default key.
  * @return {Object} The JSON response.
  */
-async function fetchVideoJson(id) {
-    let url = "https://youtube.googleapis.com/youtube/v3/videos?"
-    const params = {
-      "part": "id,snippet,contentDetails",
-      "id": id,
-      "key": "AIzaSyDZhxq5ynR0_7VK2zxufeUSusae-AgHu6M",
-    }
-
-    Object.entries(params).forEach(([key, value]) => {
-      url += "&" + key + "=" + value
-    })
-
-    console.log("FETCH", url)
+async function fetchVideoJson(id, key = "AIzaSyDZhxq5ynR0_7VK2zxufeUSusae-AgHu6M") {
+    const url = `https://youtube.googleapis.com/youtube/v3/videos?`
+      + `part=id,snippet,contentDetails&id=${id}&key=${key}`
+    console.log(new Date(), "FETCH", url)
     const response = await fetch(url)
     return await response.json()
 }
@@ -371,6 +368,9 @@ function templateResponse(videoJson, spacing) {
     videoJson.snippet.thumbnails.default
   ]
   const thumbnail = thumbnails.find(thumbnail => thumbnail !== undefined).url
+
+  console.log(new Date(), "INFO", template)
+  console.log(new Date(), "INFO", thumbnail)
 
   return {
     "status": "success",

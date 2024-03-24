@@ -22,6 +22,7 @@ The API accepts GET requests and does not require any authentication or API key.
 | --------- | ----------- |
 | id        | Required. Accepts any public YouTube video URL or ID. For example, "NzoneDE0A2o". |
 | spacing   | Optional. Accepts "single", "double", "tab", or "none". Defaults to "single". |
+| key       | Optional. Replaces the default YouTube API key used by the application. |
 
 Example API call:
 
