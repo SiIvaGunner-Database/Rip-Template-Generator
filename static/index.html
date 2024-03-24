@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
+    <meta name="description" content="An embeddable HTML form and JSON API for generating wiki article rip templates from video URLs or IDs." />
+    <title>Rip Template Generator</title>
     <link rel="stylesheet" href="https://storage.googleapis.com/siivagunnerdb-prod-media/style.css" />
     <link rel="stylesheet" href="style.css" />
-    <script type="text/javascript"  src="script.js"></script>
   </head>
   <body>
     <main>
-      <form onsubmit="return submitTemplateGenerator()">
-        <input type="text" id="inputText" placeholder="Enter URL or ID"/>
-        <button id="submitBtn">Submit</button>
-        <button type="button" onclick="copyTemplate()">Copy</button>
-        <select id="format">
+      <form id="generatorForm">
+        <input id="idInput" type="text" placeholder="Enter URL or ID" />
+        <button id="submitButton">Submit</button>
+        <button id="copyButton" type="button">Copy</button>
+        <select id="formatSelect">
           <option value="single">One-sided spacing</option>
           <option value="double">Double-sided spacing</option>
           <option value="tab">Tabbed spacing</option>
           <option value="none">No spacing</option>
         </select>
       </form>
-      <textarea readonly id="template" rows="21">
+      <textarea readonly id="templateArea" rows="21">
 {{Rip
 |image= Fire Emblem.jpg
 
@@ -38,13 +40,14 @@
 |catchphrase= Go-Go Gadget Channel Description!
 }}
 "'''The Inn - Fire Emblem'''" is a high quality rip of "The Inn" from ''Fire Emblem''.
-== Jokes ==
-      </textarea>
-      <div id="thumbnail">
+== Jokes ==</textarea>
+      <div id="thumbnailDiv">
         <a target="_blank" href="https://i.ytimg.com/vi/NzoneDE0A2o/maxresdefault.jpg">
           <img src="https://i.ytimg.com/vi/NzoneDE0A2o/maxresdefault.jpg" alt="The thumbnail of the given rip shown on YouTube">
         </a>
       </div>
+      <script type="text/javascript" src="generator.js"></script>
+      <script type="text/javascript" src="index.js"></script>
     </main>
   </body>
 </html>

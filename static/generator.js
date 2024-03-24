@@ -1,146 +1,85 @@
-let lastFormattingSelection = "single" // Default spacing format
-document.onclick = checkFormattingSelection
+"use strict"
 
 /**
- * Format the spacing used in the rip template.
- * Triggered by all page clicks.
+ * Generate an index JSON response.
+ * @return {Object} The JSON response.
  */
-function checkFormattingSelection() {
-  const currentFormattingSelection = document.getElementById("format").value
-
-  if (currentFormattingSelection !== lastFormattingSelection) {
-    let template = document.getElementById("template").value.toString()
-    template = template.replace("== Jokes ==", "JOKEHEADER")
-    lastFormattingSelection = currentFormattingSelection
-
-    switch(currentFormattingSelection) {
-      case "none":
-        template = template.replace(/\t\t\t= |\t\t= |\t= | = |= /g, "=")
-        break
-      case "single":
-        template = template.replace(/\t\t\t= |\t\t= |\t= | = |=/g, "= ")
-        break
-      case "double":
-        template = template.replace(/\t\t\t= |\t\t= |\t= |= |=/g, " = ")
-        break
-      case "tab":
-        template = template.replace(/ = |= |=/g, "\t\t\t= ")
-          .replace("playlist\t\t", "playlist\t")
-          .replace("playlist id\t\t\t", "playlist id\t")
-          .replace("composer\t\t", "composer\t")
-          .replace("composer label\t\t\t", "composer label\t")
-          .replace("platform\t\t", "platform\t")
-          .replace("platform label\t\t\t", "platform label\t")
-          .replace("catchphrase\t\t\t", "catchphrase\t")
-        break
-    }
-
-    template = template.replace("JOKEHEADER", "== Jokes ==")
-    document.getElementById("template").innerHTML = template
+function indexJsonResponse() {
+  return {
+    "rip": "/api/rip"
   }
 }
 
 /**
- * Copy the rip template text to the user's clipboard.
- * Triggered by copy button presses.
+ * Generate a rip template JSON response with any error messages included.
+ * @param {Object} options - A parameter object: { id: String; [spacing]: String; }
+ * @return {Object} The JSON response.
  */
-function copyTemplate() {
-  const copyText = document.getElementById("template")
-  copyText.select()
-  copyText.setSelectionRange(0, 99999) // For mobile devices
-  document.execCommand("copy")
-}
-
-/**
- * Generate a rip template for wiki articles.
- * Displays an error message if the form input is invalid.
- * Triggered by template generator form submissions.
- */
-function submitTemplateGenerator() {
-  try {
-    updateTemplate()
-  } catch (error) {
-    console.error(error.stack)
-  }
-
-  return false
-}
-
-/**
- * Generate a rip template for wiki articles.
- * Displays an error message if the form input is invalid.
- * Triggered by template generator form submissions.
- */
-async function updateTemplate() {
-  const input = document.getElementById("inputText").value.trim()
-
-  if (input.length === 0) {
-    setTemplate(`Please enter a video URL or ID. For example: "NzoneDE0A2o"`)
+async function ripJsonResponse(options) {
+  if (options.id === undefined || options.id.length === 0) {
+    return errorResponse(`Please enter a video URL or ID. For example: "NzoneDE0A2o"`)
   } else {
     // 1. Remove the URL's protocol and domain ("https://www.youtube.com/", "https://youtu.be/", etc.)
     // 2. Remove everything before the video ID parameter (e.g. "?v=[video id]")
     // 3. Remove any remaining parameters (e.g. "?param1=value1&param2=value2")
-    const id = input.replace(/.*\//g, "").replace(/.*v=/g, "").replace(/[?&].*/g, "").trim()
+    const cleanId = options.id.replace(/.*\//g, "").replace(/.*v=/g, "").replace(/[?&].*/g, "").trim()
 
-    if (id.length !== 11) {
-      setTemplate(`Invalid video URL or ID: "${input}"`)
+    if (cleanId.length !== 11) {
+      return errorResponse(`Invalid video URL or ID: "${options.id}"`)
     } else {
-      const videoListJson = await fetchVideoJson(id)
-      console.log(videoListJson)
+      const videoListJson = await fetchVideoJson(cleanId, options.key)
 
-      if (videoListJson.items.length === 0) {
-        setTemplate(`No video found with the ID "${id}"`)
+      if (videoListJson.error !== undefined) {
+        return errorResponse(videoListJson.error.message)
+      } else if (videoListJson.items.length === 0) {
+        return errorResponse(`No video found with the ID "${cleanId}"`)
       } else {
-        generateTemplate(videoListJson.items[0])
+        return templateResponse(videoListJson.items[0], options.spacing)
       }
     }
   }
 }
 
 /**
- * Set the template and thumbnail in the page.
- * @param {String} template - The template string.
- * @param {Number} [templateRowCount] - The estimated number of rows in the template, defaulting to 1.
- * @param {String} [thumbnailElement] - The thumbnail HTML element, defaulting to an empty string.
+ * Generate a failure JSON response.
+ * @param {String} id - The message to include in the response.
+ * @return {Object} The JSON response.
  */
-function setTemplate(template, templateRowCount = 1, thumbnailElement = "") {
-  document.getElementById("template").rows = templateRowCount
-  document.getElementById("template").innerHTML = template
-  document.getElementById("thumbnail").innerHTML = thumbnailElement
+function errorResponse(message) {
+  console.log(new Date(), "INFO", message)
+  return {
+    "status": "failure",
+    "message": message
+  }
 }
 
 /**
  * Fetch video metadata from the YouTube API.
  * @param {String} id - The video ID.
- * @return {Object} The JSON object.
+ * @param {String} [key] - An optional API key to use in place of the default key.
+ * @return {Object} The JSON response.
  */
-async function fetchVideoJson(id) {
-    let url = "https://youtube.googleapis.com/youtube/v3/videos?"
-    const params = {
-      "part": "id,snippet,contentDetails",
-      "id": id,
-      "key": "AIzaSyDZhxq5ynR0_7VK2zxufeUSusae-AgHu6M",
-    }
-
-    Object.entries(params).forEach(([key, value]) => {
-      url += "&" + key + "=" + value
-    })
-
+async function fetchVideoJson(id, key = "AIzaSyDZhxq5ynR0_7VK2zxufeUSusae-AgHu6M") {
+    const url = `https://youtube.googleapis.com/youtube/v3/videos?`
+      + `part=id,snippet,contentDetails&id=${id}&key=${key}`
+    console.log(new Date(), "FETCH", url)
     const response = await fetch(url)
     return await response.json()
 }
 
 /**
- * Generate a template in six primary steps:
+ * Generate a template JSON response in six primary steps:
  * Step 1. Format the upload date and length.
  * Step 2. Search and replace uncommon labels that might be in the description.
  * Step 3. Search for common template values: composer, playlist, platform, etc.
  * Step 4. Separate the full title, track title, game title, and mix.
  * Step 5. Build the rip template string.
- * Step 6. Insert the template and thumbnail into the page.
- * @param {Object} videoJson - The video metadata JSON object.
+ * Step 6. Insert the template and thumbnail into the JSON response.
+ * @param {Object} videoJson - The video's JSON metadata.
+ * @param {String} spacing - The template spacing style.
+ * @return {Object} The JSON response.
  */
-async function generateTemplate(videoJson) {
+function templateResponse(videoJson, spacing) {
   const siivaId = "UC9ecwl3FTG66jIKA9JRDtmg"
   const ttgdId = "UCIXM2qZRG9o4AFmEsKZUIvQ"
   const mysiktId = "UCnv4xkWtbqAKMj8TItM6kOA"
@@ -179,7 +118,7 @@ async function generateTemplate(videoJson) {
   length = length.replace("PT", "").replace("H", ":").replace("M", ":").replace("S", "")
 
   // Format the upload date in the style "MMMM d, yyyy"
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
   uploadDate = new Date(uploadDate)
   uploadDate = `${months[uploadDate.getUTCMonth()]} ${uploadDate.getUTCDate()}, ${uploadDate.getUTCFullYear()}`
 
@@ -257,7 +196,6 @@ async function generateTemplate(videoJson) {
 
   // Search for ripper
   if (ripperPattern.test(description) === true) {
-    console.log(ripperPattern.exec(description))
     ripper = ripperPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",")
   }
 
@@ -400,23 +338,28 @@ async function generateTemplate(videoJson) {
                 "\n== Jokes =="
   }
 
-  //////////////////////////////////////////////////////////////
-  // Step 6. Insert the template and thumbnail into the page. //
-  //////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////
+  // Step 6. Insert the template and thumbnail into the JSON response. //
+  ///////////////////////////////////////////////////////////////////////
 
-  // Format the template spacing based on the selected preference
-  const format = document.getElementById("format").value
-
-  if (format === "single") {
-    template = template.replace(/\t\t= |\t= /g, "= ")
-  } else if (format === "double") {
-    template = template.replace(/\t\t= |\t= /g, " = ")
-  } else if (format === "none") {
-    template = template.replace(/\t\t= |\t= /g, "=")
+  switch (spacing) {
+    case "tab":
+      // Tabs are used in the initial generation, so no action is needed
+      break
+    case "none":
+      template = template.replace(/\t\t= |\t= /g, "=")
+      break
+    case "double":
+      template = template.replace(/\t\t= |\t= /g, " = ")
+      break
+    case "single":
+    default:
+      // Default to single spaces
+      template = template.replace(/\t\t= |\t= /g, "= ")
+      break
   }
 
-  // Insert the template and thumbnail into the page
-  const lineCount = template.split(/\n/).length + 1
+  // Manually create the array to ensure the highest quality thumbnails are listed first
   const thumbnails = [
     videoJson.snippet.thumbnails.maxres,
     videoJson.snippet.thumbnails.standard,
@@ -424,11 +367,25 @@ async function generateTemplate(videoJson) {
     videoJson.snippet.thumbnails.medium,
     videoJson.snippet.thumbnails.default
   ]
-  const thumbnailUrl = thumbnails.find(thumbnail => thumbnail !== undefined).url
-  const thumbnailElement = `
-    <a target="_blank" href="${thumbnailUrl}">
-      <img src="${thumbnailUrl}" alt="The thumbnail of the given rip shown on YouTube">
-    </a>
-  `
-  setTemplate(template, lineCount, thumbnailElement)
+  const thumbnail = thumbnails.find(thumbnail => thumbnail !== undefined).url
+
+  console.log(new Date(), "INFO", template)
+  console.log(new Date(), "INFO", thumbnail)
+
+  return {
+    "status": "success",
+    "template": template,
+    "thumbnail": thumbnail
+  }
+}
+
+// generator.js is currently in use on both the back and front end, and a
+// try-catch statement is used here to avoid hard errors on the front end.
+try {
+  module.exports = {
+    indexJsonResponse,
+    ripJsonResponse
+  }
+} catch (error) {
+  console.warn("Silencing module.exports error\n", error)
 }
