@@ -166,6 +166,7 @@ function templateResponse(videoJson, spacing) {
   // Step 3. Search for common template values: composer, playlist, platform, etc. //
   ///////////////////////////////////////////////////////////////////////////////////
 
+  let music = ""
   let playlistId = ""
   let ripper = ""
   let developer = ""
@@ -175,6 +176,7 @@ function templateResponse(videoJson, spacing) {
   let catchphrase = ""
 
   // Set up the regular expressions
+  const musicPattern = new RegExp("Music: (.*)\n")
   const playlistIdPattern = new RegExp("Playlist: (.*)\n")
   const composerPattern = new RegExp("Composer: (.*)\n")
   const performerPattern = new RegExp("Performed by: (.*)\n")
@@ -190,6 +192,11 @@ function templateResponse(videoJson, spacing) {
   }
 
   description = description.replace(/,/g, "COMMA")
+
+  // Search for music
+  if (musicPattern.test(description) === true) {
+    music = musicPattern.exec(description).toString().split(",").pop()
+  }
 
   // Search for playlist ID
   if (playlistIdPattern.test(description) === true) {
@@ -315,7 +322,7 @@ function templateResponse(videoJson, spacing) {
     }
 
     if (channelId !== mysiktId) {
-      template += "\n|music\t\t= " + track
+      template += "\n|music\t\t= " + music
     }
 
     template += /* "\n|composer\t= " + */ composer +
