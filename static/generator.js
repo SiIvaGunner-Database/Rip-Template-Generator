@@ -242,7 +242,7 @@ function templateResponse(videoJson, spacing) {
   let mix = ""
 
   // Characters used to separate the track from the game and the mix
-  let gameSeperatorChar = "-"
+  let gameSeperatorChar = " - "
   let mixSeperatorChar = "("
 
   if (channelId === mysiktId) {
@@ -250,8 +250,8 @@ function templateResponse(videoJson, spacing) {
       mixSeperatorChar = "~"
     }
 
-    if (pageName.includes("|")) {
-      gameSeperatorChar = "|"
+    if (pageName.includes(" | ")) {
+      gameSeperatorChar = " | "
     }
   }
 
