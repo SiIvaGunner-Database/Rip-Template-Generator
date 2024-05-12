@@ -47,11 +47,7 @@ npm start
 ### External Links
 
 * [Template Generator Production Environment](https://generator.siivagunnerdatabase.net/)
-
 * [Template Generator Development Environment](https://dev.generator.siivagunnerdatabase.net/)
-
 * [SiIvaGunner Database Template Generator Page](https://siivagunnerdatabase.net/generate/)
-
 * [Google Sites Template Generator Page](https://sites.google.com/view/rip-template-generator/home)
-
 * [SiIvaGunner Wiki](https://siivagunner.fandom.com/wiki/SiIvaGunner_Wiki)

@@ -128,6 +128,8 @@ function templateResponse(videoJson, spacing) {
   //////////////////////////////////////////////////////////////////////////////////
 
   let composerLabel = ""
+  let arrangerLabel = ""
+  let performerLabel = ""
   let platformLabel = ""
 
   // Search for composer labels
@@ -137,15 +139,30 @@ function templateResponse(videoJson, spacing) {
   } else if (description.includes("Composer(s): ") === true) {
     description = description.replace("Composer(s): ", "Composer: ")
     composerLabel = "\n|composer label\t= Composer(s)"
-  } else if (description.includes("Arrangement: ") === true) {
-    description = description.replace("Arrangement: ", "Composer: ")
-    composerLabel = "\n|composer label\t= Arrangement"
-  } else if (description.includes("Arrangers: ") === true) {
-    description = description.replace("Arrangers: ", "Composer: ")
-    composerLabel = "\n|composer label\t= Arrangers"
   } else if (description.includes("Composed by: ") === true) {
     description = description.replace("Composed by: ", "Composer: ")
     composerLabel = "\n|composer label\t= Composed by"
+  }
+
+  // Search for arranger labels
+  if (description.includes("Arrangement: ") === true) {
+    description = description.replace("Arrangement: ", "Arranged by: ")
+    arrangerLabel = "\n|arranger label\t= Arrangement"
+  } else if (description.includes("Arrangers: ") === true) {
+    description = description.replace("Arrangers: ", "Arranged by: ")
+    arrangerLabel = "\n|arranger label\t= Arrangers"
+  } else if (description.includes("Arranger: ") === true) {
+    description = description.replace("Arranger: ", "Arranged by: ")
+    arrangerLabel = "\n|arranger label\t= Arranger"
+  }
+
+  // Search for performer labels
+  if (description.includes("Performers: ") === true) {
+    description = description.replace("Performers: ", "Performed by: ")
+    performerLabel = "\n|performer label\t= Performers"
+  } else if (description.includes("Performer: ") === true) {
+    description = description.replace("Performer: ", "Performed by: ")
+    performerLabel = "\n|performer label\t= Performer"
   }
 
   // Search for platform labels
@@ -166,16 +183,22 @@ function templateResponse(videoJson, spacing) {
   // Step 3. Search for common template values: composer, playlist, platform, etc. //
   ///////////////////////////////////////////////////////////////////////////////////
 
+  let music = ""
   let playlistId = ""
   let ripper = ""
   let developer = ""
+  let arranger = ""
   let composer = ""
+  let performer = ""
   let platform = ""
   let catchphrase = ""
 
   // Set up the regular expressions
+  const musicPattern = new RegExp("Music: (.*)\n")
   const playlistIdPattern = new RegExp("Playlist: (.*)\n")
   const composerPattern = new RegExp("Composer: (.*)\n")
+  const arrangerPattern = new RegExp("Arranged by: (.*)\n")
+  const performerPattern = new RegExp("Performed by: (.*)\n")
   const developerPattern = new RegExp("Developed by: (.*)\n")
   const platformPattern = new RegExp("Platform: (.*)\n")
   let ripperPattern
@@ -188,6 +211,11 @@ function templateResponse(videoJson, spacing) {
   }
 
   description = description.replace(/,/g, "COMMA")
+
+  // Search for music
+  if (musicPattern.test(description) === true) {
+    music = musicPattern.exec(description).toString().split(",").pop()
+  }
 
   // Search for playlist ID
   if (playlistIdPattern.test(description) === true) {
@@ -209,6 +237,16 @@ function templateResponse(videoJson, spacing) {
     composer = "\n|composer\t= " + composerPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",")
   }
 
+  // Search for arranger
+  if (arrangerPattern.test(description) === true) {
+    arranger = "\n|arranger\t= " + arrangerPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",")
+  }
+
+  // Search for performer
+  if (performerPattern.test(description) === true) {
+    performer = "\n|performer\t= " + performerPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",")
+  }
+
   // Search for platform
   if (platformPattern.test(description) === true) {
     platform = "\n|platform\t= " + platformPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",")
@@ -228,7 +266,7 @@ function templateResponse(videoJson, spacing) {
   let mix = ""
 
   // Characters used to separate the track from the game and the mix
-  let gameSeperatorChar = "-"
+  let gameSeperatorChar = " - "
   let mixSeperatorChar = "("
 
   if (channelId === mysiktId) {
@@ -236,8 +274,8 @@ function templateResponse(videoJson, spacing) {
       mixSeperatorChar = "~"
     }
 
-    if (pageName.includes("|")) {
-      gameSeperatorChar = "|"
+    if (pageName.includes(" | ")) {
+      gameSeperatorChar = " | "
     }
   }
 
@@ -308,11 +346,15 @@ function templateResponse(videoJson, spacing) {
     }
 
     if (channelId !== mysiktId) {
-      template += "\n|music\t\t= " + track
+      template += "\n|music\t\t= " + music
     }
 
     template += /* "\n|composer\t= " + */ composer +
-                /* "\n|composer label\t= " + */ composerLabel
+                /* "\n|composer label\t= " + */ composerLabel +
+                /* "\n|arranger\t= " + */ arranger +
+                /* "\n|arranger label\t= " + */ arrangerLabel +
+                /* "\n|performer\t= " + */ performer +
+                /* "\n|performer label\t= " + */ performerLabel
 
     if (channelId === mysiktId) {
       template += "\n|developer\t\t= " + developer
