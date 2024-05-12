@@ -170,12 +170,14 @@ function templateResponse(videoJson, spacing) {
   let ripper = ""
   let developer = ""
   let composer = ""
+  let performer = ""
   let platform = ""
   let catchphrase = ""
 
   // Set up the regular expressions
   const playlistIdPattern = new RegExp("Playlist: (.*)\n")
   const composerPattern = new RegExp("Composer: (.*)\n")
+  const performerPattern = new RegExp("Performed by: (.*)\n")
   const developerPattern = new RegExp("Developed by: (.*)\n")
   const platformPattern = new RegExp("Platform: (.*)\n")
   let ripperPattern
@@ -207,6 +209,11 @@ function templateResponse(videoJson, spacing) {
   // Search for composer
   if (composerPattern.test(description) === true) {
     composer = "\n|composer\t= " + composerPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",")
+  }
+
+  // Search for performer
+  if (performerPattern.test(description) === true) {
+    performer = "\n|performer\t= " + performerPattern.exec(description).toString().split(",").pop().replace(/COMMA/g, ",")
   }
 
   // Search for platform
@@ -312,7 +319,8 @@ function templateResponse(videoJson, spacing) {
     }
 
     template += /* "\n|composer\t= " + */ composer +
-                /* "\n|composer label\t= " + */ composerLabel
+                /* "\n|composer label\t= " + */ composerLabel +
+                /* "\n|performer\t= " + */ performer
 
     if (channelId === mysiktId) {
       template += "\n|developer\t\t= " + developer
