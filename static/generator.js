@@ -333,8 +333,13 @@ function templateResponse(videoJson, spacing) {
   }
 
   template += "\n|upload\t\t= " + uploadDate +
-              "\n|length\t\t= " + length +
-              "\n|author\t\t= " + ripper
+              "\n|length\t\t= " + length
+
+  if (channelId === ttgdId) {
+    template += "\n|ripper\t\t= " + ripper
+  } else {
+    template += "\n|author\t\t= " + ripper
+  }
 
   if (channelId !== vavrId) {
     template += "\n"
