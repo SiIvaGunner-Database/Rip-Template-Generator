@@ -50,4 +50,4 @@ npm start
 * [Template Generator Development Environment](https://dev.generator.siivagunnerdatabase.net/)
 * [SiIvaGunner Database Template Generator Page](https://siivagunnerdatabase.net/generate/)
 * [Google Sites Template Generator Page](https://sites.google.com/view/rip-template-generator/home)
-* [SiIvaGunner Wiki](https://siivagunner.fandom.com/wiki/SiIvaGunner_Wiki)
+* [SiIvaGunner Wiki](https://siivagunner.wiki/wiki/SiIvaGunner_Wiki)
