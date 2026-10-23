@@ -84,6 +84,7 @@ function templateResponse(videoJson, spacing) {
   const ttgdId = "UCIXM2qZRG9o4AFmEsKZUIvQ"
   const mysiktId = "UCnv4xkWtbqAKMj8TItM6kOA"
   const vavrId = "UCCPGE1kAoonfPsbieW41ZZA"
+  const vgmaId = "UC4lrKpt8RdtoH62QA3iEBBA"
 
   const pageName = videoJson.snippet.title.toString()
   const videoId = videoJson.id
@@ -201,6 +202,7 @@ function templateResponse(videoJson, spacing) {
   const performerPattern = new RegExp("Performed by: (.*)\n")
   const developerPattern = new RegExp("Developed by: (.*)\n")
   const platformPattern = new RegExp("Platform: (.*)\n")
+
   let ripperPattern
 
   if (description.includes("\n\n")) {
@@ -253,8 +255,34 @@ function templateResponse(videoJson, spacing) {
   }
 
   // Search for catchphrase
-  if (!description.includes("Please read the channel description.") && description.match(/(\n\n|\u2550\n)/)) {
+  if (!description.includes("Please read the channel description.") && description.match(/(\n\n|\u2550\n)/) && channelId !== vgmaId) {
     catchphrase = "\n|catchphrase\t= " + description.split(/(\n\n|\u2550\n)/).pop().replace(/COMMA/g, ",")
+  }
+
+  // This will contain the game listed in the description rather than the title
+  let vgmaGame = ""
+
+  if (channelId === vgmaId) {
+    const vgmaPattern = new RegExp(`"(.*)" is a track from (.*). I do not own this trackCOMMA this was composed by (.*). (.*) was developed by (.*).`)
+    const vgmaPlaylistIdPattern = new RegExp(`Tracks:(.*)$`)
+
+    if (description.includes("Tracks:") === true) {
+      playlistId = description.split("Tracks:").pop().replace(/COMMA/g, ",").trim()
+    }
+
+    if (vgmaPattern.test(description) === true) {
+      vgmaPattern.exec(description).forEach((value, index) => {
+        if (index === 1) {
+          music = '"' + value + '"'
+        } else if (index === 2) {
+          vgmaGame = "\n|game\t= ''" + value + "''"
+        } else if (index === 3) {
+          composer = "\n|composer\t= " + value
+        } else if (index === 5) {
+          developer = value
+        }
+      })
+    }
   }
 
   ////////////////////////////////////////////////////////////////////////
@@ -277,14 +305,21 @@ function templateResponse(videoJson, spacing) {
     if (pageName.includes(" | ")) {
       gameSeperatorChar = " | "
     }
+  } else if (channelId === vgmaId) {
+    gameSeperatorChar = " OST: "
   }
 
   const titleSections = pageName.split(gameSeperatorChar)
 
   // Parse the game title and track
   if (titleSections.length > 1) {
-    game = titleSections.pop().trim()
-    track = titleSections.join(gameSeperatorChar).trim()
+    if (channelId === vgmaId) {
+      track = titleSections.pop().trim()
+      game = titleSections.join(gameSeperatorChar).trim()
+    } else {
+      game = titleSections.pop().trim()
+      track = titleSections.join(gameSeperatorChar).trim()
+    }
   } else {
     game = pageName
     track = pageName
@@ -322,13 +357,19 @@ function templateResponse(videoJson, spacing) {
     template += "{{DISPLAYTITLE:" + pageName.replace(/\|/g, "{{!}}") + "}}\n"
   }
 
-  template += "{{Rip" +
+  let templateName = "Rip"
+
+  if (channelId === vgmaId) {
+    templateName = "Track"
+  }
+
+  template += "{{" + templateName +
               "\n|image\t\t= " + image + ".jpg" +
               "\n" +
               "\n|link\t\t= " + videoId
 
   if (channelId !== vavrId) {
-    template += "\n|playlist\t= " + game +
+    template += "\n|playlist\t= " + game + (channelId === vgmaId ? " OSTs" : "") +
                 "\n|playlist id\t= " + playlistId.replace(/h.*=/, "")
   }
 
@@ -354,6 +395,10 @@ function templateResponse(videoJson, spacing) {
       template += "\n|music\t\t= " + music
     }
 
+    if (channelId === vgmaId) {
+      template += /* "\n|game\t= " + */ vgmaGame;
+    }
+
     template += /* "\n|composer\t= " + */ composer +
                 /* "\n|composer label\t= " + */ composerLabel +
                 /* "\n|arranger\t= " + */ arranger +
@@ -361,15 +406,21 @@ function templateResponse(videoJson, spacing) {
                 /* "\n|performer\t= " + */ performer +
                 /* "\n|performer label\t= " + */ performerLabel
 
-    if (channelId === mysiktId) {
+    if (channelId === mysiktId || channelId === vgmaId) {
       template += "\n|developer\t\t= " + developer
+    }
+
+    let ripLabel = "a high quality rip"
+
+    if (channelId === vgmaId) {
+      ripLabel = "an archived track"
     }
 
     template += /* "\n|platform\t= " + */ platform +
                 /* "\n|platform label\t= " + */ platformLabel +
                 /* "\n|catchphrase\t= " + */ catchphrase +
                 "\n}}" +
-                "\n\"'''" + pageName + "'''\" is a high quality rip " + mix +
+                "\n\"'''" + pageName + "'''\" is " + ripLabel + " " + mix +
                 "of \"" + simplifiedTrack + "\" from ''" + game + "''." +
                 "\n== Jokes =="
   } else {
