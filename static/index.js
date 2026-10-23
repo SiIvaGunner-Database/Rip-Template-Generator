@@ -114,6 +114,7 @@ async function runTests() {
     "0fsMS_SIVFA", "DjtWVlhjfF4", // TimmyTurnersGrandDad
     "mVmZo5yXBb4", "2It3LYSKyhY", // Mysikt
     "wgS4N5dZ_R8", // VvvvvaVvvvvvr
+    "7zEQZazmagk", // VGMArchives
     "https://www.youtube.com/playlist?list=PLL0CQjrcN8D0C1R9di590CNrqsUp6S1uh", // Invalid playlist URL
     "https://www.youtube.com/watch?v=NzoneDE0A2o", // Video URL
     "https://youtu.be/Sg5MsV5LZwg?si=PwHSbUxRr5qbBlIc", // Shared video URL
